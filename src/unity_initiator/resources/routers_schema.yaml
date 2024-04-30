@@ -1,0 +1,63 @@
+# This is a Yamale schema (see https://github.com/23andMe/Yamale) for
+# validating router config files for a Unity initiator.
+
+initiator_config:
+
+  # An arbitrary name for this config to potentially identify it from other initiators.
+  name: str()
+
+  # The payload type configuration. Currently only supports one payload type:
+  # 1. url
+  # In the future this can be expanded to define other payload types:
+  # - JSON
+  # - XML
+  # - SQL query result
+  payload_type:
+
+    # url payload type supports triggers use-cases:
+    # - S3 event (s3://)
+    # - file system event (HECC or on-prem) (file://)
+    # - CMR based (https:// or s3://)
+    url: list(include("regex_config"), required=True, min=1)
+
+---
+
+# Configuration for matching payload (e.g. url) against a set of compiled regular expressions
+# and mapping any matches to a set of evaluators.
+regex_config:
+  regexes: list(compiled_regex(), required=True, min=1)
+  evaluators: list(include("evaluator_config"), required=True, min=1)
+
+# Configuration of actions that submit to evaluators.
+evaluator_config:
+  name: str()
+  actions: list(include("action_config"), required=True, min=1)
+
+# Currently only 2 types of actions are supported:
+# 1. submit payload to an SNS topic
+# 2. submit payload to an airflow DAG
+action_config: any(include("submit_dag_by_id_action"), include("submit_to_sns_topic_action"))
+
+# Configuration for submitting a payload to an airflow DAG.
+submit_dag_by_id_action:
+  name: str(equals="submit_dag_by_id")
+  params:
+    dag_id: str()
+    airflow_base_api_endpoint: str(required=False)
+    airflow_username: str(required=False)
+    airflow_password: str(required=False)
+    on_success: include("on_success_actions", required=False)
+
+# Configuration for submitting a payload to an SNS topic.
+submit_to_sns_topic_action:
+  name: str(equals="submit_to_sns_topic")
+  params:
+    # topic_arn is optional to allow specific routing to an SNS topic;
+    # if this was null, empty or absent, then the assumption is a SNS
+    # topic in the local AWS account using the evaluator name as the SNS topic
+    topic_arn: str(required=False)
+    on_success: include("on_success_actions", required=False)
+
+# Configuration to pass onto the evaluator to use when evaluation is a success.
+on_success_actions:
+  actions: list(include("action_config"), required=True, min=1, max=1) 
