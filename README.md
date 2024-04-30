@@ -156,3 +156,25 @@ Key points of contact are: [@github-user-1](link to github profile) [@github-use
 -->
 
 <!-- ☝️ Replace with the key individuals who should be contacted for questions ☝️ -->
+
+# unity-initiator
+
+[![PyPI - Version](https://img.shields.io/pypi/v/unity-initiator.svg)](https://pypi.org/project/unity-initiator)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unity-initiator.svg)](https://pypi.org/project/unity-initiator)
+
+-----
+
+**Table of Contents**
+
+- [Installation](#installation)
+- [License](#license)
+
+## Installation
+
+```console
+pip install unity-initiator
+```
+
+## License
+
+`unity-initiator` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
