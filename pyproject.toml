@@ -7,7 +7,7 @@ name = "unity-initiator"
 dynamic = ["version"]
 description = 'Unity Initiator Framework'
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = "Apache-2.0"
 keywords = []
 authors = [
