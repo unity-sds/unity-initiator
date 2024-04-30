@@ -10,12 +10,12 @@ from importlib_resources import files
 # set logger
 log_format = "[%(asctime)s: %(levelname)s/%(funcName)s] %(message)s"
 logging.basicConfig(format=log_format, level=logging.INFO)
-logger = logging.getLogger('unity_initiator.utils.validate')
+logger = logging.getLogger("unity_initiator.utils.validate")
 logger.setLevel(logging.INFO)
 
 
 # schema file
-ROUTER_SCHEMA_FILE=files("unity_initiator.resources").joinpath("routers_schema.yaml")
+ROUTER_SCHEMA_FILE = files("unity_initiator.resources").joinpath("routers_schema.yaml")
 
 
 # have yaml parse regular expressions
@@ -27,6 +27,7 @@ yaml.SafeLoader.add_constructor(
 
 class CompileRegex(Validator):
     tag = "compiled_regex"
+
     def _is_valid(self, value):
         return isinstance(value, re.Pattern)
 
