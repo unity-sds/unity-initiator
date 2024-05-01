@@ -34,7 +34,7 @@
 ## Features
 
 * [INSERT LIST OF FEATURES IMPORTANT TO YOUR USERS HERE]
-  
+
 <!-- ☝️ Replace with a bullet-point list of your features ☝️ -->
 
 ## Contents
@@ -53,13 +53,13 @@ This guide provides a quick way to get started with our project. Please see our 
 ### Requirements
 
 * [INSERT LIST OF REQUIREMENTS HERE]
-  
+
 <!-- ☝️ Replace with a numbered list of your requirements, including hardware if applicable ☝️ -->
 
 ### Setup Instructions
 
 1. [INSERT STEP-BY-STEP SETUP INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
-   
+
 <!-- ☝️ Replace with a numbered list of how to set up your software prior to running ☝️ -->
 
 ### Run Instructions

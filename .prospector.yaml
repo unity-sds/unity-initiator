@@ -1,0 +1,23 @@
+output-format: pylint
+
+#strictness: medium
+test-warnings: false
+doc-warnings: false
+autodetect: true
+member-warnings: false
+
+pylint:
+  disable:
+    - import-error
+  options:
+    max-line-length: 159
+
+pycodestyle:
+  disable:
+    - E501 # line too long
+  options:
+    max-line-length: 159
+
+mccabe:
+  options:
+    max-complexity: 10

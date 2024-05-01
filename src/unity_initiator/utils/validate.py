@@ -1,11 +1,10 @@
-import re
 import logging
-import yaml
+import re
+
 import yamale
-
-from yamale.validators import DefaultValidators, Validator
+import yaml
 from importlib_resources import files
-
+from yamale.validators import DefaultValidators, Validator
 
 # set logger
 log_format = "[%(asctime)s: %(levelname)s/%(funcName)s] %(message)s"
@@ -37,10 +36,10 @@ def validate_router(router_file, schema_file=ROUTER_SCHEMA_FILE):
     validators[CompileRegex.tag] = CompileRegex
     try:
         schema = yamale.make_schema(schema_file, validators=validators)
-        with open(router_file) as f:
+        with open(router_file, encoding="utf-8") as f:
             data = [(yaml.safe_load(f), router_file)]
-        result = yamale.validate(schema, data)
+        yamale.validate(schema, data)
     except yamale.YamaleError as e:
         logger.error(e.message)
-        raise RuntimeError(e.message)
+        raise RuntimeError(e.message) from e
     return True

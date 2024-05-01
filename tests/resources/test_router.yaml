@@ -16,7 +16,7 @@ initiator_config:
             - !!python/regexp '/(?P<id>SISTER_EMIT_L1B_RDN_(?P<observation_date_time>\d{8}T\d{6})_(?P<product_counter>)_OBS\.bin)$'
         evaluators:
 
-          # If the regex matches, the router submits a JSON payload to the eval_sbg_l2_readiness SNS topic that contains 
+          # If the regex matches, the router submits a JSON payload to the eval_sbg_l2_readiness SNS topic that contains
           # the payload and the regex match groupdict() as JSON. The groupdict JSON can further provide fields to evaluate
           # criteria for go/no-go but should remain lightweight. For example, if the payload was:
           #
@@ -48,7 +48,7 @@ initiator_config:
                           airflow_base_api_endpoint: xxx
                           airflow_username: <SSM parameter, e.g. /unity/airflow/username> <ARN to username entry in AWS Secrets Manager>
                           airflow_password: <SSM parameter, e.g. /unity/airflow/password> <ARN to password entry in Secrets Manager>
-                    
+
 
       # M2020 example: xyz left finder; example of matching any one of a set of regexes
       - regexes:
@@ -57,7 +57,7 @@ initiator_config:
             - !!python/regexp 'ids-pipeline/pipes/nonlin_xyz_left/inputque/.L.{17}_.{3}DSP_N.{26}\.VIC-link'
         evaluators:
 
-          # If any of the regexes match, the router submits a JSON payload to the eval_m2020_xyz_left_finder SNS topic that contains 
+          # If any of the regexes match, the router submits a JSON payload to the eval_m2020_xyz_left_finder SNS topic that contains
           # the payload and the regex match groupdict() as JSON. The groupdict JSON can further provide fields to evaluate criteria
           # for go/no-go but should remain lightweight.
           - name: eval_m2020_xyz_left_finder
@@ -82,7 +82,7 @@ initiator_config:
             - !!python/regexp '/(?P<id>(?P<Mission>NISAR)_S(?P<SCID>\d{3})_(?P<Station>\w{2,3})_(?P<Antenna>\w{3,4})_M(?P<Mode>\d{2})_P(?P<Pass>\d{5})_R(?P<Receiver>\d{2})_C(?P<Channel>\d{2})_G(?P<Group>\d{2})_(?P<FileCreationDateTime>\d{4}_\d{3}_\d{2}_\d{2}_\d{2}_\d{6})\d{3}\.vc(?P<VCID>\w{2}))$'
         evaluators:
 
-          # If the regex matches, the router submits a JSON payload to the eval_nisar_ingest SNS topic that contains 
+          # If the regex matches, the router submits a JSON payload to the eval_nisar_ingest SNS topic that contains
           # the payload and the regex match groupdict() as JSON. The groupdict JSON can further provide fields to evaluate
           # criteria for go/no-go but should remain lightweight.
           - name: eval_nisar_ingest
@@ -108,7 +108,7 @@ initiator_config:
         evaluators:
 
           # If the regex matches, the router submits a JSON payload to the eval_nisar_l0a_readiness DAG via Airflow REST API
-          # that contains the the payload and the regex match groupdict() as JSON. The groupdict JSON can further provide 
+          # that contains the the payload and the regex match groupdict() as JSON. The groupdict JSON can further provide
           # fields to evaluate criteria for go/no-go but in this case we make a call to submit a dag execution for a heavyweight
           # and possibly long-running evaluation (current worst case pass: 1877 telemetry files, each 200 MB, all ingested and checksum verified; dependency on GDS staging)
           - name: eval_nisar_l0a_readiness

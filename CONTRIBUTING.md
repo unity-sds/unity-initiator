@@ -4,7 +4,7 @@ Thanks for taking the time to consider contributing! We very much appreciate you
 
 ## Prerequisites
 
-Before you begin contributing to our project, it'll be a good idea to ensure you've satisfied the below pre-requisites. 
+Before you begin contributing to our project, it'll be a good idea to ensure you've satisfied the below pre-requisites.
 
 ### License
 
@@ -12,16 +12,16 @@ Our project has our licensing terms, including rules governing redistribution, d
 
 ### Code of Conduct
 
-Our Code of Conduct helps facilitate a positive interaction environment for everyone involved with the team, and provides guidance on what to do if you experience problematic behavior. Read more in our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and make sure you agree to its terms. 
+Our Code of Conduct helps facilitate a positive interaction environment for everyone involved with the team, and provides guidance on what to do if you experience problematic behavior. Read more in our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and make sure you agree to its terms.
 
 ### Developer Environment
 
-For patch contributions, see our [Developer Documentation]([INSERT YOUR DEVELOPMENT GUIDE LINK HERE]) for more details on how to set up your local environment, to best contribute to our project. 
+For patch contributions, see our [Developer Documentation]([INSERT YOUR DEVELOPMENT GUIDE LINK HERE]) for more details on how to set up your local environment, to best contribute to our project.
 
 At a minimum however to submit patches (if using Git), you'll want to ensure you have:
 1. An account on the Version Control System our project uses (i.e. GitHub).
 2. The Version Control System client (i.e. Git) installed on your local machine.
-3. The ability to edit, build, and test our project on your local machine. Again, see our [README.md](README.md) or detailed developer guide for more details 
+3. The ability to edit, build, and test our project on your local machine. Again, see our [README.md](README.md) or detailed developer guide for more details
 
 ### Communication Channels
 
@@ -43,7 +43,7 @@ Our communication channels are:
 
 ## Our Development Process
 
-Our project integrates contributions from many people, and so we'd like to outline a process you can use to visualize how your contributions may be integrated if you provide something. 
+Our project integrates contributions from many people, and so we'd like to outline a process you can use to visualize how your contributions may be integrated if you provide something.
 
 ```mermaid
 flowchart TD
@@ -56,7 +56,7 @@ flowchart TD
 
 ### Fork our Repository
 
-Forking our repository, as opposed to directly committing to a branch is the preferred way to propose changes. 
+Forking our repository, as opposed to directly committing to a branch is the preferred way to propose changes.
 
 See [this GitHub guide](https://docs.github.com/en/get-started/quickstart/fork-a-repo) on forking for information specific to GitHub.com
 
@@ -68,7 +68,7 @@ Make sure people are aware you're working on a patch! Check out our [issue track
 
 Our project typically has the following branches available, make sure to fork either the default branch or a branch someone else already tagged with a particular issue ticket you're working with.
 - `main`[INSERT DEFAULT VCS BRANCH NAME HERE] - default branch
-- [INSERT ADDITIONAL TYPICAL VCS BRANCH NAMES HERE] - 
+- [INSERT ADDITIONAL TYPICAL VCS BRANCH NAMES HERE] -
 
 ### Make your Modifications
 
@@ -88,9 +88,9 @@ Commit should always be atomic. Keep solutions isolated whenever possible. Fille
 
 ### Submit a Pull Request
 
-Pull requests are the core way our project will receive your patch contributions. Navigate to your branch on your own fork within the version control system, and submit a pull request or submit the patch text to our project. 
+Pull requests are the core way our project will receive your patch contributions. Navigate to your branch on your own fork within the version control system, and submit a pull request or submit the patch text to our project.
 
-Please make sure to provide a meaningful text description to your pull requests, whenever submitted. Our pull-request template will be auto-generated for you when you create your pull-request. See the template [here]([INSERT LINK TO YOUR PULL REQUEST TEMPLATE, ex: .github/PULL_REQUEST_TEMPLATE.md]). 
+Please make sure to provide a meaningful text description to your pull requests, whenever submitted. Our pull-request template will be auto-generated for you when you create your pull-request. See the template [here]([INSERT LINK TO YOUR PULL REQUEST TEMPLATE, ex: .github/PULL_REQUEST_TEMPLATE.md]).
 
 **Working on your first Pull Request?** See guide: [How to Contribute to an Open Source Project on GitHub](https://kcd.im/pull-request)
 
@@ -112,7 +112,7 @@ Reviewing pull-requests, or any kinds of proposed patch changes, is an art. That
 
 > *Do you like to talk about new features, changes, requests?*
 
-Issue tickets are a very simple way to get involved in our project. It also helps new contributors get an understanding of the project more comprehensively. This is a great place to get started with the project if you're not sure where to start. 
+Issue tickets are a very simple way to get involved in our project. It also helps new contributors get an understanding of the project more comprehensively. This is a great place to get started with the project if you're not sure where to start.
 
 See our list of issues at: [INSERT LINK TO YOUR ISSUE TRACKING SYSTEM]
 
@@ -121,7 +121,7 @@ See our list of issues at: [INSERT LINK TO YOUR ISSUE TRACKING SYSTEM]
 Often we receive duplicate issues that can confuse project members on *which* issue ticket to hold conversations upon.
 
 Here's how you can help:
-1. Scan the list of *open* issue tickets for duplicate titles, or internal wording 
+1. Scan the list of *open* issue tickets for duplicate titles, or internal wording
 2. If you find duplicates, copy / paste the below message on the conversation thread of the issue ticket *that has less participants* involved
 
 ```
@@ -130,7 +130,7 @@ This is a duplicate issue. Please migrate conversations over to [issue-XYZ](hype
 
 #### Good First Issues
 
-Issue tickets can vary in complexity, and issues labeled with `good first issue` labels are often a great way to get started with the project as a newcomer. 
+Issue tickets can vary in complexity, and issues labeled with `good first issue` labels are often a great way to get started with the project as a newcomer.
 
 Take a look at our [issue tracking system]([INSERT LINK TO YOUR ISSUE TRACKING SYSTEM]), and filter by `good first issue` for issues that are low-complexity, and that will help you get familiar with our issue tracking and patch submission process.
 
@@ -181,7 +181,7 @@ Please be sure to:
 
 #### Reviewing Pull Requests
 
-Reviewing others' contributions is a great way to learn about best practices in both contributions as well as software. 
+Reviewing others' contributions is a great way to learn about best practices in both contributions as well as software.
 
 Take a look at our [pull requests tracking system]([INSERT LINK FOR PULL REQUESTS TRACKING SYSTEM]), and try the following options for providing a review:
 1. Read the code / patch associated with the pull-request, and take note of any coding, bug, or documentation issues if found
@@ -200,17 +200,17 @@ Once you have a solid issue ticket in hand and are ready to work on code, you'll
 3. Go through our [development process](#our-development-process), including proposing changes to our project.
 
 Some guidelines for code-specific contributions:
-- **Do your homework** - read-up on necessary documentation, like `README.md`s, developer documentation, and pre-existing code to see the intention and context necessary to make your contribution a success. It's important to _communicate_ what you're working on through our project [communication channels](#communication-channels) and get buy-in from frequent contributors - this will help the project be more receptive to your contributions! 
+- **Do your homework** - read-up on necessary documentation, like `README.md`s, developer documentation, and pre-existing code to see the intention and context necessary to make your contribution a success. It's important to _communicate_ what you're working on through our project [communication channels](#communication-channels) and get buy-in from frequent contributors - this will help the project be more receptive to your contributions!
 - **Ask questions** - its important to ask questions while you work on your contributions, to check-in with frequent contributors on the style and the set of expectations to make your code contribution work well with pre-existing project code. Use our [communication channels](#communication-channels)
-- **Keep positive** - code contributions, by their nature, have direct impacts on the output and functionality of the project. Keep a positive spirit as your code is reviewed, and take it in stride if core contributors take time to review, give you suggestions for your code or respectfully decline your contribution. This is all part of the process for quality open source development. 
-- **Comments** - include *useful* comments throughout your code that explain the intention of a code block, not a step-by-step analysis. See our [inline code documentation](#inline-code-documentation) section for specifics. 
+- **Keep positive** - code contributions, by their nature, have direct impacts on the output and functionality of the project. Keep a positive spirit as your code is reviewed, and take it in stride if core contributors take time to review, give you suggestions for your code or respectfully decline your contribution. This is all part of the process for quality open source development.
+- **Comments** - include *useful* comments throughout your code that explain the intention of a code block, not a step-by-step analysis. See our [inline code documentation](#inline-code-documentation) section for specifics.
 
 [INSERT ADDITIONAL SECTIONS HERE FOR MORE SPECIFIC CLASSES OF CODE CONTRIBUTIONS DEPENDING ON YOUR MODULES, LANGUAGES, PLATFORMS IN USE BY YOUR PROJECT. THE MORE DETAILS YOU OFFER, THE MORE LIKELY SOMEONE IS TO UNDERSTAND HOW TO CONTRIBUTE]
 <!-- EXAMPLE: APIs, PyTest, etc. -->
 
-### 📖 Documentation 
+### 📖 Documentation
 
-Documentation is the core way our users and contributors learn about the project. We place a high value on the quality, thoroughness, and readability of our documentation. Writing or editing documentation is an excellent way to contribute to our project without performing active coding. 
+Documentation is the core way our users and contributors learn about the project. We place a high value on the quality, thoroughness, and readability of our documentation. Writing or editing documentation is an excellent way to contribute to our project without performing active coding.
 
 ⚠️ It's **highly** advised that you take a look at our [issue-tracking system]([INSERT LINK TO YOUR ISSUE TRACKING SYSTEM]) before considering any documentation contributions. Here's some guidelines:
 1. Check if any duplicate issues exist that cover your documentation contribution idea / task, and add comments to those tickets with your thoughts.
@@ -241,7 +241,7 @@ The overall structure of our project documentation is as follows:
 - Hosted documentation
   - [Wiki Main-page]()
     - [Wiki Sub-page 1]()
-    - [Wiki Sub-page 2]() 
+    - [Wiki Sub-page 2]()
 - Discussion Boards
   - [Discussion Board Topic 1]()
   - [Discussion Board Topic 2]()
@@ -261,9 +261,9 @@ For directions on contributing to our source-controlled documentation:
 
 <!-- OPTIONAL FOR HOSTED DOCUMENTATION >
 For directions on contributing to our hosted documentation:
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 [INSERT HOSTED DOCUMENTATION PLATFORM SPECIFIC INSTRUCTIONS HERE FOR HOW TO CONTRIBUTE]
 -->
@@ -271,10 +271,10 @@ For directions on contributing to our hosted documentation:
 #### Writing Style
 
 To ensure documentation is readable and consistent by newcomers and experts alike, here are some suggestions on writing style for English:
-- Use gender neutral pronouns (they/their/them) instead of he/she/his/her 
-- Avoid qualifiers that minimize the difficulty of a task at hand, e.g. avoid words like “easily”, “simply”, “just”, “merely”, “straightforward”, etc. Readers' expertise may not match your own, and qualifying complexity may deter some readers if the task does not match their level of experience. That being said, if a particular task is difficult or complex, do mention that. 
+- Use gender neutral pronouns (they/their/them) instead of he/she/his/her
+- Avoid qualifiers that minimize the difficulty of a task at hand, e.g. avoid words like “easily”, “simply”, “just”, “merely”, “straightforward”, etc. Readers' expertise may not match your own, and qualifying complexity may deter some readers if the task does not match their level of experience. That being said, if a particular task is difficult or complex, do mention that.
 
-#### Common Wording 
+#### Common Wording
 
 Below are some commonly used words you'll want to leverage in your documentation contributions:
 - **GitHub** - one word, and capitalization of the 'G' and the 'H'
@@ -282,9 +282,9 @@ Below are some commonly used words you'll want to leverage in your documentation
 
 #### Inline Code Documentation
 
-For language-specific guidance on code documentation, including style guides, see [Google's list of language style guides](https://google.github.io/styleguide/) for a variety of languages. 
+For language-specific guidance on code documentation, including style guides, see [Google's list of language style guides](https://google.github.io/styleguide/) for a variety of languages.
 
-Additionally, take a look at Google's recommendations on [inline code documentation](https://google.github.io/styleguide/docguide/best_practices.html#documentation-is-the-story-of-your-code) for best practices. 
+Additionally, take a look at Google's recommendations on [inline code documentation](https://google.github.io/styleguide/docguide/best_practices.html#documentation-is-the-story-of-your-code) for best practices.
 
 #### Media
 
@@ -299,7 +299,7 @@ When including media into our version-control system, it is recommended to use f
 
 ### ❓ Questions
 
-Answering questions is an excellent way to learn more about our project, as well as get better known in our project community. 
+Answering questions is an excellent way to learn more about our project, as well as get better known in our project community.
 
 Here are just a few ways you can help answer questions for our project:
 - Answer open questions in our [discussion forum]([INSERT LINK TO DISCUSSION FORUM])
@@ -310,7 +310,7 @@ When answering questions, keep the following in mind:
 - Be polite and friendly. See our [Code of Conduct](CODE_OF_CONDUCT.md) recommendations as you interact with others in the team.
 - Repeat the specific question you are answering, followed by your suggestion.
 - If suggesting code, repeat the line of code that needs to be altered, followed by your alteration
-- Include any post-steps or checks to verify your answer can be reproduced 
+- Include any post-steps or checks to verify your answer can be reproduced
 
 ### 🎨 Design
 
@@ -330,4 +330,4 @@ A great way to contribute towards our project goals is to socialize and encourag
 - Help point project contributors and community members to conferences and publications where they may socialize their unique innovations
 - Schedule in-person or virtual happy-hours to help create a more social atmosphere within the project community
 
-For the above ideas, use our [communication channels](#communication-channels) to propose get-togethers.  
+For the above ideas, use our [communication channels](#communication-channels) to propose get-togethers.
