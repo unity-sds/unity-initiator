@@ -3,7 +3,7 @@ from importlib_resources import files
 from yamale.yamale_error import YamaleError
 
 from unity_initiator.constants.actions import ACTIONS
-from unity_initiator.utils.validate import validate_router
+from unity_initiator.utils.conf_utils import validate_router
 
 
 def test_validate():

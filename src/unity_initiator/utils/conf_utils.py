@@ -1,4 +1,3 @@
-import logging
 import re
 
 import yamale
@@ -6,12 +5,7 @@ import yaml
 from importlib_resources import files
 from yamale.validators import DefaultValidators, Validator
 
-# set logger
-log_format = "[%(asctime)s: %(levelname)s/%(funcName)s] %(message)s"
-logging.basicConfig(format=log_format, level=logging.INFO)
-logger = logging.getLogger("unity_initiator.utils.validate")
-logger.setLevel(logging.INFO)
-
+from .logger import logger
 
 # schema file
 ROUTER_SCHEMA_FILE = files("unity_initiator.resources").joinpath("routers_schema.yaml")
