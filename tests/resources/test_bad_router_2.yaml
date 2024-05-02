@@ -1,0 +1,5 @@
+initiator_config:
+  name: bad config example 2
+  payload_type:
+    url:
+      - regexes:

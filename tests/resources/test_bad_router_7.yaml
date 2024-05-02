@@ -1,0 +1,19 @@
+initiator_config:
+  name: bad config example 7
+  payload_type:
+    url:
+      - regexes:
+            - !!python/regexp '/(?P<id>(?P<Mission>NISAR)_S(?P<SCID>\d{3})_(?P<Station>\w{2,3})_(?P<Antenna>\w{3,4})_M(?P<Mode>\d{2})_P(?P<Pass>\d{5})_R(?P<Receiver>\d{2})_C(?P<Channel>\d{2})_G(?P<Group>\d{2})_(?P<FileCreationDateTime>\d{4}_\d{3}_\d{2}_\d{2}_\d{2}_\d{5})(?P<R>\d{1,4})\.ldf)$'
+        evaluators:
+          - name: eval_nisar_l0a_readiness
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: eval_nisar_l0a_readiness
+                  airflow_base_api_endpoint: xxx
+                  airflow_username: <SSM parameter, e.g. /unity/airflow/username> <ARN to username entry in AWS Secrets Manager>
+                  airflow_password: <SSM parameter, e.g. /unity/airflow/password> <ARN to password entry in Secrets Manager>
+                  on_success:
+                    actions:
+                      - name: submit_dag_by_id
+                        params: {}

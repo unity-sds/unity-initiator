@@ -41,5 +41,5 @@ def validate_router(router_file, schema_file=ROUTER_SCHEMA_FILE):
         yamale.validate(schema, data)
     except yamale.YamaleError as e:
         logger.error(e.message)
-        raise RuntimeError(e.message) from e
+        raise
     return True

@@ -1,0 +1,15 @@
+initiator_config:
+  name: bad config example 5
+  payload_type:
+    url:
+      - regexes:
+            - !!python/regexp '/(?P<id>SISTER_EMIT_L1B_RDN_(?P<observation_date_time>\d{8}T\d{6})_(?P<product_counter>)_OBS\.bin)$'
+        evaluators:
+          - name: eval_sbg_l2_readiness
+            actions:
+              - name: submit_to_sns_topic
+                params:
+                  topic_arn: arn:aws:sns:us-west-2:123456789012:eval_sbg_l2_readiness
+                  on_success:
+                    actions:
+                      - name: submit_dag_by_id

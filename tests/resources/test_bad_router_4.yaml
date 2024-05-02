@@ -1,0 +1,10 @@
+initiator_config:
+  name: bad config example 4
+  payload_type:
+    url:
+      - regexes:
+            - !!python/regexp '/(?P<id>SISTER_EMIT_L1B_RDN_(?P<observation_date_time>\d{8}T\d{6})_(?P<product_counter>)_OBS\.bin)$'
+        evaluators:
+          - name: eval_sbg_l2_readiness
+            actions:
+              - name: some_unimplemented_action
