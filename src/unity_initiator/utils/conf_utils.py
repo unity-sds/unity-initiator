@@ -25,15 +25,16 @@ class CompileRegex(Validator):
         return isinstance(value, re.Pattern)
 
 
-def validate_router(router_file, schema_file=ROUTER_SCHEMA_FILE):
+def parse_router_file(router_file, schema_file=ROUTER_SCHEMA_FILE):
     validators = DefaultValidators.copy()
     validators[CompileRegex.tag] = CompileRegex
     try:
         schema = yamale.make_schema(schema_file, validators=validators)
         with open(router_file, encoding="utf-8") as f:
-            data = [(yaml.safe_load(f), router_file)]
+            cfg = yaml.safe_load(f)
+        data = [(cfg, router_file)]
         yamale.validate(schema, data)
+        return cfg
     except yamale.YamaleError as e:
         logger.error(e.message)
         raise
-    return True

@@ -10,13 +10,11 @@ pylint:
   disable:
     - import-error
   options:
-    max-line-length: 159
+    max-line-length: 127
 
 pycodestyle:
-  disable:
-    - E501 # line too long
   options:
-    max-line-length: 159
+    max-line-length: 127
 
 mccabe:
   options:
