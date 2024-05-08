@@ -2,7 +2,7 @@ import pytest
 from importlib_resources import files
 from yamale.yamale_error import YamaleError
 
-from unity_initiator.constants.actions import ACTIONS
+from unity_initiator.actions import ACTION_MAP
 from unity_initiator.utils.conf_utils import parse_router_file
 
 
@@ -53,7 +53,7 @@ def test_validate_bad_router_4():
     router_file = files("tests.resources").joinpath("test_bad_router_4.yaml")
     with pytest.raises(YamaleError) as excinfo:
         parse_router_file(router_file)
-    for action in ACTIONS:
+    for action in ACTION_MAP:
         assert (
             f"initiator_config.payload_type.url.0.evaluators.0.actions.0.name: some_unimplemented_action does not equal {action}"
             in str(excinfo.value)

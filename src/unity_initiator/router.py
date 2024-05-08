@@ -1,3 +1,4 @@
+from .evaluator import Evaluator
 from .utils.conf_utils import parse_router_file
 from .utils.logger import logger
 
@@ -8,3 +9,8 @@ class Router:
         self._config_file = config_file
         self._config = parse_router_file(self._config_file)
         logger.info("Successfully validated router config %s.", self._config_file)
+
+    def get_evaluators_by_url(self, url):
+        # TODO: add logic to loop over config to match evaluator by regex
+        logger.info("url: %s", url)
+        yield Evaluator(self._config)
