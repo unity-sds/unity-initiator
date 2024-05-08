@@ -6,6 +6,9 @@ __all__ = ["SubmitDagByID"]
 
 class SubmitDagByID(Action):
 
-    def __init__(self, config):
-        super().__init__(config)
-        logger.debug("instantiated SubmitDagByID object")
+    def __init__(self, payload, payload_info, params):
+        super().__init__(payload, payload_info, params)
+        logger.info("instantiated %s", __class__.__name__)
+
+    def execute(self):
+        return {"success": True}

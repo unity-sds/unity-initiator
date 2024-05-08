@@ -13,7 +13,7 @@ initiator_config:
 
       # SBG example: L1B data staged to S3 bucket and payload is S3 url
       - regexes:
-            - !!python/regexp '/(?P<id>SISTER_EMIT_L1B_RDN_(?P<observation_date_time>\d{8}T\d{6})_(?P<product_counter>)_OBS\.bin)$'
+            - !!python/regexp '/(?P<id>SISTER_EMIT_L1B_RDN_(?P<observation_date_time>\d{8}T\d{6})_(?P<product_counter>\d{3})_OBS\.bin)$'
         evaluators:
 
           # If the regex matches, the router submits a JSON payload to the eval_sbg_l2_readiness SNS topic that contains
@@ -39,7 +39,7 @@ initiator_config:
                   # topic_arn is optional to allow specific routing to an SNS topic;
                   # if this was null, empty or absent, then the assumption is a SNS
                   # topic in the local AWS account using the evaluator name as the SNS topic
-                  #topic_arn: arn:aws:sns:us-west-2:123456789012:eval_sbg_l2_readiness
+                  topic_arn: arn:aws:sns:us-west-2:123456789012:eval_sbg_l2_readiness
                   on_success:
                     actions:
                       - name: submit_dag_by_id
