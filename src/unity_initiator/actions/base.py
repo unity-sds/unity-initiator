@@ -13,3 +13,6 @@ class Action(ABC):
     @abstractmethod
     def execute(self):
         pass
+
+    async def async_execute(self):
+        return self.execute()

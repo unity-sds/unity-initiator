@@ -20,4 +20,5 @@ class SubmitToSNSTopic(Action):
         return self._topic_arn
 
     def execute(self):
+        logger.debug("executed execute in %s", __class__.__name__)
         return {"success": True}

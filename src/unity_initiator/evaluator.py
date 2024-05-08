@@ -19,7 +19,7 @@ class Evaluator:
 
     def get_actions(self):
         for act_cfg in self._config.get("actions", []):
-            logger.info("act_cfg: %s", json.dumps(act_cfg, indent=2))
+            logger.debug("act_cfg: %s", json.dumps(act_cfg, indent=2))
             act_name = act_cfg.get("name")
             yield ACTION_MAP[act_name](
                 self._payload, self._payload_info, act_cfg["params"]

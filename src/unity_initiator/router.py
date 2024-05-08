@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 from .evaluator import Evaluator
@@ -21,8 +22,23 @@ class Router:
                 logger.debug("match: %s", match)
                 if match:
                     for eval_cfg in url_cfg.get("evaluators", []):
-                        logger.info(
+                        logger.debug(
                             "eval_cfg: %s",
                             json.dumps(eval_cfg, cls=YamlConfEncoder, indent=2),
                         )
                         yield Evaluator(eval_cfg, url, match.groupdict())
+
+    async def resolve_async_actions(self, url):
+        return await asyncio.gather(
+            *[
+                action.async_execute()
+                for evaluator in self.get_evaluators_by_url(url)
+                for action in evaluator.get_actions()
+            ]
+        )
+
+    def execute_actions(self, url):
+        loop = asyncio.get_event_loop()
+        results = loop.run_until_complete(self.resolve_async_actions(url))
+        loop.close()
+        return results

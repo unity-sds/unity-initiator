@@ -11,4 +11,5 @@ class SubmitDagByID(Action):
         logger.info("instantiated %s", __class__.__name__)
 
     def execute(self):
+        logger.debug("executed execute in %s", __class__.__name__)
         return {"success": True}

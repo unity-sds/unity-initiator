@@ -5,8 +5,7 @@ from yamale.yamale_error import YamaleError
 from unity_initiator.actions import ACTION_MAP
 from unity_initiator.evaluator import Evaluator
 from unity_initiator.router import Router
-
-# from unity_initiator.utils.logger import logger
+from unity_initiator.utils.logger import logger
 
 
 def test_router_instantiation():
@@ -48,3 +47,15 @@ def test_route_url_1():
             )
             response = action.execute()
             assert response["success"]
+
+
+def test_route_url_1_execute_actions():
+    """Test routing a url payload and executing actions: SBG example"""
+
+    router_file = files("tests.resources").joinpath("test_router.yaml")
+    router = Router(router_file)
+    url = "s3://bucket/prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin"
+    results = router.execute_actions(url)
+    logger.debug("results: %s", results)
+    for res in results:
+        assert res["success"]
