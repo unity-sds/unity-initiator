@@ -35,6 +35,7 @@ dependencies = [
   "flake8-string-format~=0.3.0",
   "yamale~=5.2.1",
   "prospector~=0.12.2",
+  "moto[all]~=5.0.6",
 ]
 
 [project.urls]

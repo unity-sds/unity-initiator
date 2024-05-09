@@ -1,5 +1,9 @@
+import json
+
+import boto3
 import pytest
 from importlib_resources import files
+from moto import mock_aws
 from yamale.yamale_error import YamaleError
 
 from unity_initiator.actions import ACTION_MAP
@@ -26,35 +30,39 @@ def test_invalid_router_1():
         Router(router_file)
 
 
+@mock_aws
 def test_route_url_1():
     """Test routing a url payload: SBG example"""
 
+    url = "s3://bucket/prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin"
+    client = boto3.client("sns")
     router_file = files("tests.resources").joinpath("test_router.yaml")
     router = Router(router_file)
-    url = "s3://bucket/prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin"
     evaluators = list(router.get_evaluators_by_url(url))
     assert len(evaluators) == 1
     for evaluator in evaluators:
         assert isinstance(evaluator, Evaluator)
         assert evaluator.name == "eval_sbg_l2_readiness"
+        topic_arn = client.create_topic(Name=evaluator.name)["TopicArn"]
         actions = list(evaluator.get_actions())
         assert len(actions) == 1
         for action in actions:
             assert isinstance(action, ACTION_MAP["submit_to_sns_topic"])
-            assert (
-                action.topic_arn
-                == "arn:aws:sns:us-west-2:123456789012:eval_sbg_l2_readiness"
-            )
+            assert action.topic_arn == topic_arn
             response = action.execute()
             assert response["success"]
+            logger.info("response: %s", json.dumps(response, indent=2))
 
 
-def test_route_url_1_execute_actions():
+@mock_aws
+def test_execute_actions_route_url_1():
     """Test routing a url payload and executing actions: SBG example"""
 
+    url = "s3://bucket/prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin"
+    client = boto3.client("sns")
     router_file = files("tests.resources").joinpath("test_router.yaml")
     router = Router(router_file)
-    url = "s3://bucket/prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin"
+    client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
     results = router.execute_actions(url)
     logger.debug("results: %s", results)
     for res in results:
