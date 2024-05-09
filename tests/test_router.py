@@ -35,7 +35,7 @@ def test_route_url_1():
     """Test routing a url payload: SBG example"""
 
     url = "s3://bucket/prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin"
-    client = boto3.client("sns")
+    client = boto3.client("sns", region_name="us-west-2")
     router_file = files("tests.resources").joinpath("test_router.yaml")
     router = Router(router_file)
     evaluators = list(router.get_evaluators_by_url(url))
@@ -59,7 +59,7 @@ def test_execute_actions_route_url_1():
     """Test routing a url payload and executing actions: SBG example"""
 
     url = "s3://bucket/prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin"
-    client = boto3.client("sns")
+    client = boto3.client("sns", region_name="us-west-2")
     router_file = files("tests.resources").joinpath("test_router.yaml")
     router = Router(router_file)
     client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
