@@ -7,18 +7,17 @@
 <!-- ☝️ Replace with your logo (if applicable) via ![](https://uri-to-your-logo-image) ☝️ -->
 <!-- ☝️ If you see logo rendering errors, make sure you're not using indentation, or try an HTML IMG tag -->
 
-<h1 align="center">[INSERT YOUR REPO / PROJ NAME HERE]</h1>
+<h1 align="center">Unity Initiator</h1>
 <!-- ☝️ Replace with your repo name ☝️ -->
 
 </div>
 
-<pre align="center">[INSERT A SINGLE SENTENCE DESCRIBING THE PURPOSE OF YOUR REPO / PROJ]</pre>
+<pre align="center">A framework for implementing triggers that initiate evaluation actions in Unity subsystems (e.g. SPS)</pre>
 <!-- ☝️ Replace with a single sentence describing the purpose of your repo / proj ☝️ -->
 
 <!-- Header block for project -->
 
-[INSERT YOUR BADGES HERE (SEE: https://shields.io)] [![SLIM](https://img.shields.io/badge/Best%20Practices%20from-SLIM-blue)](https://nasa-ammos.github.io/slim/)
-<!-- ☝️ Add badges via: https://shields.io e.g. ![](https://img.shields.io/github/your_chosen_action/your_org/your_repo) ☝️ -->
+[![Python package](https://github.com/unity-sds/unity-initiator/actions/workflows/python-package.yml/badge.svg)](https://github.com/unity-sds/unity-initiator/actions/workflows/python-package.yml)
 
 [INSERT SCREENSHOT OF YOUR SOFTWARE, IF APPLICABLE]
 <!-- ☝️ Screenshot of your software (if applicable) via ![](https://uri-to-your-screenshot) ☝️ -->
