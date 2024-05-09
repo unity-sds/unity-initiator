@@ -9,7 +9,7 @@ initiator_config:
             actions:
               - name: submit_to_sns_topic
                 params:
-                  topic_arn: arn:aws:sns:us-west-2:123456789012:eval_sbg_l2_readiness
+                  topic_arn: arn:aws:sns:hilo-hawaii-1:123456789012:eval_sbg_l2_readiness
                   on_success:
                     actions:
                       - name: submit_dag_by_id
