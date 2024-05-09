@@ -39,7 +39,7 @@ initiator_config:
                   # topic_arn is optional to allow specific routing to an SNS topic;
                   # if this was null, empty or absent, then the assumption is a SNS
                   # topic in the local AWS account using the evaluator name as the SNS topic
-                  topic_arn: arn:aws:sns:us-west-2:123456789012:eval_sbg_l2_readiness
+                  topic_arn: arn:aws:sns:hilo-hawaii-1:123456789012:eval_sbg_l2_readiness
                   on_success:
                     actions:
                       - name: submit_dag_by_id
@@ -67,7 +67,7 @@ initiator_config:
                   # topic_arn is optional to allow specific routing to an SNS topic;
                   # if this was null, empty or absent, then the assumption is a SNS
                   # topic in the local AWS account using the evaluator name as the SNS topic
-                  #topic_arn: arn:aws:sns:us-west-2:123456789012:eval_m2020_xyz_left_finder
+                  #topic_arn: arn:aws:sns:hilo-hawaii-1:123456789012:eval_m2020_xyz_left_finder
                   on_success:
                     actions:
                       - name: submit_dag_by_id
@@ -92,7 +92,7 @@ initiator_config:
                   # topic_arn is optional to allow specific routing to an SNS topic;
                   # if this was null, empty or absent, then the assumption is a SNS
                   # topic in the local AWS account using the evaluator name as the SNS topic
-                  #topic_arn: arn:aws:sns:us-west-2:123456789012:eval_nisar_ingest
+                  #topic_arn: arn:aws:sns:hilo-hawaii-1:123456789012:eval_nisar_ingest
                   on_success:
                     actions:
                       - name: submit_dag_by_id
