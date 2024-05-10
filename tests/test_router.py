@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 
@@ -15,6 +16,19 @@ from unity_initiator.utils.logger import logger
 # mock default region
 os.environ["MOTO_ALLOW_NONEXISTENT_REGION"] = "True"
 os.environ["AWS_DEFAULT_REGION"] = "hilo-hawaii-1"
+
+
+@pytest.fixture(autouse=True)
+def event_loop():
+    """Create an instance of the default event loop for each test case."""
+
+    policy = asyncio.get_event_loop_policy()
+    res = policy.new_event_loop()
+    asyncio.set_event_loop(res)
+    res._close = res.close
+    res.close = lambda: None
+    yield res
+    res._close()
 
 
 def test_router_instantiation():
@@ -69,6 +83,21 @@ def test_execute_actions_route_url_1():
     router = Router(router_file)
     client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
     results = router.execute_actions(url)
-    logger.debug("results: %s", results)
+    logger.info("results: %s", results)
+    for res in results:
+        assert res["success"]
+
+
+@mock_aws
+def test_execute_actions_route_url_2():
+    """Test routing a url payload and executing actions: M2020 example"""
+
+    url = "s3://bucket/ids-pipeline/pipes/nonlin_xyz_left/inputque/ML01234567891011121_000RAS_N01234567890101112131415161.VIC-link"
+    client = boto3.client("sns")
+    router_file = files("tests.resources").joinpath("test_router.yaml")
+    router = Router(router_file)
+    client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
+    results = router.execute_actions(url)
+    logger.info("results: %s", results)
     for res in results:
         assert res["success"]
