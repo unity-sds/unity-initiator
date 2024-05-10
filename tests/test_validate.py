@@ -1,15 +1,9 @@
-import os
-
 import pytest
 from importlib_resources import files
 from yamale.yamale_error import YamaleError
 
 from unity_initiator.actions import ACTION_MAP
 from unity_initiator.utils.conf_utils import parse_router_file
-
-# mock default region
-os.environ["MOTO_ALLOW_NONEXISTENT_REGION"] = "True"
-os.environ["AWS_DEFAULT_REGION"] = "hilo-hawaii-1"
 
 
 def test_validate():

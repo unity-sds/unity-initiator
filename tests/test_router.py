@@ -1,4 +1,5 @@
 import json
+import os
 
 import boto3
 import pytest
@@ -10,6 +11,10 @@ from unity_initiator.actions import ACTION_MAP
 from unity_initiator.evaluator import Evaluator
 from unity_initiator.router import Router
 from unity_initiator.utils.logger import logger
+
+# mock default region
+os.environ["MOTO_ALLOW_NONEXISTENT_REGION"] = "True"
+os.environ["AWS_DEFAULT_REGION"] = "hilo-hawaii-1"
 
 
 def test_router_instantiation():
