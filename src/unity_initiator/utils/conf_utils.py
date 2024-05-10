@@ -37,7 +37,7 @@ def parse_router_file(router_file, schema_file=ROUTER_SCHEMA_FILE):
         yamale.validate(schema, data)
         return cfg
     except yamale.YamaleError as e:
-        logger.error(e.message)
+        logger.info(e.message)
         raise
 
 

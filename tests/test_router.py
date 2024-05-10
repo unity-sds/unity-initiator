@@ -92,12 +92,17 @@ def test_execute_actions_route_url_1():
 def test_execute_actions_route_url_2():
     """Test routing a url payload and executing actions: M2020 example"""
 
-    url = "s3://bucket/ids-pipeline/pipes/nonlin_xyz_left/inputque/ML01234567891011121_000RAS_N01234567890101112131415161.VIC-link"
     client = boto3.client("sns")
     router_file = files("tests.resources").joinpath("test_router.yaml")
     router = Router(router_file)
-    client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
-    results = router.execute_actions(url)
-    logger.info("results: %s", results)
-    for res in results:
-        assert res["success"]
+    for test_file in (
+        "ML01234567891011121_000RAS_N01234567890101112131415161.VIC-link",
+        "MR01234567891011121_000RAS_N01234567890101112131415161.VIC-link",
+        "ML01234567891011121_000DSP_N01234567890101112131415161.VIC-link",
+    ):
+        url = f"s3://bucket/ids-pipeline/pipes/nonlin_xyz_left/inputque/{test_file}"
+        client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
+        results = router.execute_actions(url)
+        logger.info("results: %s", results)
+        for res in results:
+            assert res["success"]
