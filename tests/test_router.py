@@ -40,7 +40,7 @@ def test_router_instantiation():
     assert isinstance(router, Router)
 
 
-def test_invalid_router_1():
+def test_router_instantation_failure():
     """Test failure of creating a router object because of failed validation of router config."""
 
     router_file = files("tests.resources").joinpath("test_bad_router_1.yaml")
@@ -51,7 +51,7 @@ def test_invalid_router_1():
 
 
 @mock_aws
-def test_route_url_1():
+def test_route_sbg_url():
     """Test routing a url payload: SBG example"""
 
     url = "s3://bucket/prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin"
@@ -75,7 +75,7 @@ def test_route_url_1():
 
 
 @mock_aws
-def test_execute_actions_route_url_1():
+def test_execute_actions_route_sbg_url():
     """Test routing a url payload and executing actions: SBG example"""
 
     url = "s3://bucket/prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin"
@@ -90,7 +90,7 @@ def test_execute_actions_route_url_1():
 
 
 @mock_aws
-def test_execute_actions_route_url_2():
+def test_execute_actions_route_m2020_url():
     """Test routing a url payload and executing actions: M2020 example"""
 
     client = boto3.client("sns")
@@ -110,7 +110,7 @@ def test_execute_actions_route_url_2():
 
 
 @mock_aws
-def test_execute_actions_route_url_3():
+def test_execute_actions_route_nisar_telemetry_url():
     """Test routing a url payload and executing actions: NISAR telemetry example"""
 
     url = "s3://bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc29"
@@ -125,7 +125,7 @@ def test_execute_actions_route_url_3():
 
 
 @mock_aws
-def test_execute_actions_route_url_4(httpx_mock: HTTPXMock):
+def test_execute_actions_route_nisar_ldf_url(httpx_mock: HTTPXMock):
     """Test routing a url payload and executing actions: NISAR LDF example"""
 
     # mock airflow REST API
