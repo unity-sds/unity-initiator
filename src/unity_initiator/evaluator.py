@@ -5,7 +5,6 @@ from .utils.logger import logger
 
 
 class Evaluator:
-
     def __init__(self, config, payload, payload_info, action_map=ACTION_MAP):
         self._config = config
         self._payload = payload

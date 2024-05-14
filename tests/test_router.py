@@ -6,6 +6,7 @@ import boto3
 import pytest
 from importlib_resources import files
 from moto import mock_aws
+from pytest_httpx import HTTPXMock
 from yamale.yamale_error import YamaleError
 
 from unity_initiator.actions import ACTION_MAP
@@ -106,3 +107,39 @@ def test_execute_actions_route_url_2():
         logger.info("results: %s", results)
         for res in results:
             assert res["success"]
+
+
+@mock_aws
+def test_execute_actions_route_url_3():
+    """Test routing a url payload and executing actions: NISAR telemetry example"""
+
+    url = "s3://bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc29"
+    client = boto3.client("sns")
+    router_file = files("tests.resources").joinpath("test_router.yaml")
+    router = Router(router_file)
+    client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
+    results = router.execute_actions(url)
+    logger.info("results: %s", results)
+    for res in results:
+        assert res["success"]
+
+
+@mock_aws
+def test_execute_actions_route_url_4(httpx_mock: HTTPXMock):
+    """Test routing a url payload and executing actions: NISAR LDF example"""
+
+    # mock airflow REST API
+    httpx_mock.add_response(
+        url="https://example.com/api/v1/dags/eval_nisar_l0a_readiness/dagRuns",
+        json={"dag_id": "eval_nisar_l0a_readiness"},
+    )
+
+    url = "s3://bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_18_03_05_087077000.ldf"
+    client = boto3.client("sns")
+    router_file = files("tests.resources").joinpath("test_router.yaml")
+    router = Router(router_file)
+    client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
+    results = router.execute_actions(url)
+    logger.info("results: %s", results)
+    for res in results:
+        assert res["success"]

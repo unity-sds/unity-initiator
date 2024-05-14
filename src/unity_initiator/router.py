@@ -7,7 +7,6 @@ from .utils.logger import logger
 
 
 class Router:
-
     def __init__(self, config_file):
         self._config_file = config_file
         self._config = YamlConf(self._config_file)

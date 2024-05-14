@@ -9,7 +9,6 @@ __all__ = ["SubmitToSNSTopic"]
 
 
 class SubmitToSNSTopic(Action):
-
     def __init__(self, payload, payload_info, params):
         super().__init__(payload, payload_info, params)
         self._topic_arn = self._params.get("topic_arn", None)
