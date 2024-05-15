@@ -19,6 +19,7 @@ class SubmitDagByID(Action):
         # https://airflow.apache.org/docs/apache-airflow/stable/stable-rest-api-ref.html#operation/post_dag_run
         logger.debug("executing execute in %s", __class__.__name__)
         url = f"{self._params['airflow_base_api_endpoint']}/dags/{self._params['dag_id']}/dagRuns"
+        logger.info("url: %s", url)
         dag_run_id = str(uuid.uuid4())
         logical_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         headers = {"Content-Type": "application/json", "Accept": "application/json"}

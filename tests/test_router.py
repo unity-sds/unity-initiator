@@ -4,9 +4,10 @@ import os
 
 import boto3
 import pytest
+import respx
+from httpx import Response
 from importlib_resources import files
 from moto import mock_aws
-from pytest_httpx import HTTPXMock
 from yamale.yamale_error import YamaleError
 
 from unity_initiator.actions import ACTION_MAP
@@ -124,29 +125,32 @@ def test_execute_actions_for_nisar_telemetry_url():
         assert res["success"]
 
 
+@respx.mock
 @mock_aws
-def test_execute_actions_for_nisar_ldf_url(httpx_mock: HTTPXMock):
+def test_execute_actions_for_nisar_ldf_url():
     """Test routing a url payload and executing actions: NISAR LDF example"""
 
     # mock airflow REST API
-    httpx_mock.add_response(
-        url="https://example.com/api/v1/dags/eval_nisar_l0a_readiness/dagRuns",
-        json={
-            "dag_run_id": "string",
-            "dag_id": "eval_nisar_l0a_readiness",
-            "logical_date": "2024-06-13T14:15:22Z",
-            "execution_date": "2024-06-13T14:15:22Z",
-            "start_date": "2024-06-13T14:15:22Z",
-            "end_date": "2024-06-13T14:15:22Z",
-            "data_interval_start": "2024-06-13T14:15:22Z",
-            "data_interval_end": "2024-06-13T14:15:22Z",
-            "last_scheduling_decision": "2024-06-13T14:15:22Z",
-            "run_type": "dataset_triggered",
-            "state": "queued",
-            "external_trigger": True,
-            "conf": {},
-            "note": "",
-        },
+    respx.post("https://example.com/api/v1/dags/eval_nisar_l0a_readiness/dagRuns").mock(
+        return_value=Response(
+            200,
+            json={
+                "dag_run_id": "string",
+                "dag_id": "eval_nisar_l0a_readiness",
+                "logical_date": "2024-06-13T14:15:22Z",
+                "execution_date": "2024-06-13T14:15:22Z",
+                "start_date": "2024-06-13T14:15:22Z",
+                "end_date": "2024-06-13T14:15:22Z",
+                "data_interval_start": "2024-06-13T14:15:22Z",
+                "data_interval_end": "2024-06-13T14:15:22Z",
+                "last_scheduling_decision": "2024-06-13T14:15:22Z",
+                "run_type": "dataset_triggered",
+                "state": "queued",
+                "external_trigger": True,
+                "conf": {},
+                "note": "",
+            },
+        )
     )
 
     url = "s3://bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_18_03_05_087077000.ldf"

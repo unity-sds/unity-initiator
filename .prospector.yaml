@@ -9,6 +9,7 @@ member-warnings: false
 pylint:
   disable:
     - import-error
+    - django-not-available
   options:
     max-line-length: 159
 
