@@ -88,7 +88,7 @@ def build_mock_lambda_package():
             "run",
             "--rm",
             "-v",
-            f"{os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))}/unity-initiator:/var/task",
+            f"{os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))}/unity-initiator:/var/task",
             "mlupin/docker-lambda:python3.9-build",
             "./scripts/build_mock_lambda_package.sh",
         ]
