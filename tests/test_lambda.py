@@ -1,10 +1,10 @@
 import json
 import os
-import subprocess
 from importlib.metadata import version
 from uuid import uuid4
 
 import boto3
+import docker
 import pytest
 import respx
 from botocore.exceptions import ClientError
@@ -85,18 +85,18 @@ def build_mock_lambda_package():
         "Running build_lambda_script: %s\nThis may take some time...",
         build_lambda_script,
     )
-    proc = subprocess.run(
-        [
-            "docker",
-            "run",
-            "--rm",
-            "-v",
-            f"{os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))}:/var/task",
-            "mlupin/docker-lambda:python3.9-build",
-            "./scripts/build_mock_lambda_package.sh",
-        ]
+    client = docker.from_env()
+    client.containers.run(
+        "mlupin/docker-lambda:python3.9-build",
+        "./scripts/build_mock_lambda_package.sh",
+        auto_remove=True,
+        volumes={
+            f"{os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))}": {
+                "bind": "/var/task",
+                "mode": "rw",
+            }
+        },
     )
-    assert proc.returncode == 0
 
 
 def get_lambda_code():
