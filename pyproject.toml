@@ -42,6 +42,9 @@ dependencies = [
   # TODO: remove cryptography pin when this issue resolved:
   # cryptography/hazmat/bindings/_rust.abi3.so: cannot open shared object file: No such file or directory
   "cryptography<35.0.0",
+  # TODO: remove requests pin when this issue resolved:
+  # https://github.com/docker/docker-py/issues/3256
+  "requests<2.32.0",
 ]
 
 [project.urls]
