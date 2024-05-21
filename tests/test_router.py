@@ -12,7 +12,7 @@ from yamale.yamale_error import YamaleError
 
 from unity_initiator.actions import ACTION_MAP
 from unity_initiator.evaluator import Evaluator
-from unity_initiator.router import Router
+from unity_initiator.router import NoEvaluatorRegexMatched, Router
 from unity_initiator.utils.logger import logger
 
 # mock default region
@@ -162,3 +162,14 @@ def test_execute_actions_for_nisar_ldf_url():
     logger.info("results: %s", results)
     for res in results:
         assert res["success"]
+
+
+@mock_aws
+def test_unrecognized_url():
+    """Test routing a url payload that is unrecognized: NISAR L0B example"""
+
+    url = "s3://bucket/prefix/NISAR_L0_PR_RRSD_063_136_A_129S_20240120T230041_20240120T230049_D00401_N_J_001.h5"
+    router_file = files("tests.resources").joinpath("test_router.yaml")
+    router = Router(router_file)
+    with pytest.raises(NoEvaluatorRegexMatched, match=r"No regex matched url"):
+        list(router.get_evaluators_by_url(url))

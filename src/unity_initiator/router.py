@@ -6,12 +6,17 @@ from .utils.conf_utils import YamlConf, YamlConfEncoder
 from .utils.logger import logger
 
 
+class NoEvaluatorRegexMatched(Exception):
+    pass
+
+
 class Router:
     def __init__(self, config_file):
         self._config_file = config_file
         self._config = YamlConf(self._config_file)
 
     def get_evaluators_by_url(self, url):
+        found_match = False
         for url_cfg in (
             self._config.get("initiator_config").get("payload_type").get("url", [])
         ):
@@ -20,12 +25,15 @@ class Router:
                 match = regex.search(url)
                 logger.debug("match: %s", match)
                 if match:
+                    found_match = True
                     for eval_cfg in url_cfg.get("evaluators", []):
                         logger.debug(
                             "eval_cfg: %s",
                             json.dumps(eval_cfg, cls=YamlConfEncoder, indent=2),
                         )
                         yield Evaluator(eval_cfg, url, match.groupdict())
+        if not found_match:
+            raise NoEvaluatorRegexMatched(f"No regex matched url {url}.")
 
     async def resolve_async_actions(self, url):
         return await asyncio.gather(

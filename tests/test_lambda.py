@@ -1,10 +1,10 @@
 import json
 import os
-import subprocess
 from importlib.metadata import version
 from uuid import uuid4
 
 import boto3
+import docker
 import pytest
 import respx
 from botocore.exceptions import ClientError
@@ -81,19 +81,22 @@ def build_mock_lambda_package():
     """Build the mock lambda package."""
 
     build_lambda_script = files("scripts").joinpath("build_mock_lambda_package.sh")
-    logger.info("build_lambda_script: %s", build_lambda_script)
-    proc = subprocess.run(
-        [
-            "docker",
-            "run",
-            "--rm",
-            "-v",
-            f"{os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))}:/var/task",
-            "mlupin/docker-lambda:python3.9-build",
-            "./scripts/build_mock_lambda_package.sh",
-        ]
+    logger.info(
+        "Running build_lambda_script: %s\nThis may take some time...",
+        build_lambda_script,
     )
-    assert proc.returncode == 0
+    client = docker.from_env()
+    client.containers.run(
+        "mlupin/docker-lambda:python3.9-build",
+        "./scripts/build_mock_lambda_package.sh",
+        auto_remove=True,
+        volumes={
+            f"{os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))}": {
+                "bind": "/var/task",
+                "mode": "rw",
+            }
+        },
+    )
 
 
 def get_lambda_code():
@@ -114,9 +117,13 @@ class TestLambdaInvocations:
         cls.mock.start()
         cls.client = boto3.client("lambda")
         cls.function_name = str(uuid4())[0:6]
+
+        # TODO: Should use either AppConfig or retrieve router config from S3 location.
+        # For now, writing out router config body to env variable to pass to lambda.
         cls.router_file = files("tests.resources").joinpath("test_router.yaml")
         with open(cls.router_file) as f:
             cls.router_cfg = f.read()
+
         cls.fxn = cls.client.create_function(
             FunctionName=cls.function_name,
             Runtime="python3.11",
@@ -204,15 +211,18 @@ class TestLambdaInvocations:
         for res in results:
             assert res["success"]
 
-    # def test_invoke_function_unrecognized(self):
-    #    """Test invocations of the router lambda using an unrecognized url."""
+    def test_invoke_function_unrecognized(self):
+        """Test invocations of the router lambda using an unrecognized url."""
 
-    #    in_data = {"payload": "s3://bucket/prefix/SWOTdata.nc"}
-    #    invoke_res = self.client.invoke(
-    #        FunctionName=self.function_name, InvocationType="Event", Payload=json.dumps(in_data)
-    #    )
-    #    logger.info("invoke_res: %s", invoke_res)
-    #    results = json.loads(invoke_res["Payload"].read().decode("utf-8"))
-    #    logger.info("results: %s", results)
-    #    for res in results:
-    #        assert res["success"] == False
+        in_data = {
+            "payload": "s3://bucket/prefix/NISAR_L0_PR_RRSD_063_136_A_129S_20240120T230041_20240120T230049_D00401_N_J_001.h5"
+        }
+        invoke_res = self.client.invoke(
+            FunctionName=self.function_name,
+            InvocationType="Event",
+            Payload=json.dumps(in_data),
+        )
+        logger.info("invoke_res: %s", invoke_res)
+        results = json.loads(invoke_res["Payload"].read().decode("utf-8"))
+        logger.info("results: %s", results)
+        assert results["errorType"] == "NoEvaluatorRegexMatched"
