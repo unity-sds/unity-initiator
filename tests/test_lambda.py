@@ -12,7 +12,7 @@ from httpx import Response
 from importlib_resources import files
 from moto import mock_aws
 
-from unity_initiator.cloud.lambda_handler import lambda_handler as lh
+from unity_initiator.cloud.lambda_handler import lambda_handler_base
 from unity_initiator.utils.logger import logger
 
 # mock default region
@@ -54,7 +54,7 @@ def lambda_handler(event, context):
         )
     )
 
-    return lh(event, context)
+    return lambda_handler_base(event, context)
 
 
 def get_role_name():
