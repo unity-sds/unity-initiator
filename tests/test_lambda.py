@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from importlib.metadata import version
 from uuid import uuid4
 
@@ -12,7 +13,10 @@ from httpx import Response
 from importlib_resources import files
 from moto import mock_aws
 
-from unity_initiator.cloud.lambda_handler import lambda_handler_base
+from unity_initiator.cloud.lambda_handler import (
+    lambda_handler_base,
+    lambda_handler_initiator,
+)
 from unity_initiator.utils.logger import logger
 
 # mock default region
@@ -20,16 +24,14 @@ os.environ["MOTO_ALLOW_NONEXISTENT_REGION"] = "True"
 os.environ["AWS_DEFAULT_REGION"] = "hilo-hawaii-1"
 
 
-@respx.mock
-@mock_aws
-def lambda_handler(event, context):
-    """Lambda handler that mocks AWS and Airflow API calls."""
+def setup_mock_resources():
+    """Create mocked AWS and Airflow resources."""
 
     # create mock SNS topics
     client = boto3.client("sns")
-    client.create_topic(Name="eval_sbg_l2_readiness")["TopicArn"]
-    client.create_topic(Name="eval_m2020_xyz_left_finder")["TopicArn"]
-    client.create_topic(Name="eval_nisar_ingest")["TopicArn"]
+    client.create_topic(Name="eval_sbg_l2_readiness")
+    client.create_topic(Name="eval_m2020_xyz_left_finder")
+    client.create_topic(Name="eval_nisar_ingest")
 
     # mock airflow REST API
     respx.post("https://example.com/api/v1/dags/eval_nisar_l0a_readiness/dagRuns").mock(
@@ -54,7 +56,23 @@ def lambda_handler(event, context):
         )
     )
 
+
+@respx.mock
+@mock_aws
+def mocked_lambda_handler_base(event, context):
+    """Base lambda handler that mocks AWS and Airflow API calls."""
+
+    setup_mock_resources()
     return lambda_handler_base(event, context)
+
+
+@respx.mock
+@mock_aws
+def mocked_lambda_handler_initiator(event, context):
+    """Intitiator lambda handler that mocks AWS and Airflow API calls."""
+
+    setup_mock_resources()
+    return lambda_handler_initiator(event, context)
 
 
 def get_role_name():
@@ -128,7 +146,7 @@ class TestLambdaInvocations:
             FunctionName=cls.function_name,
             Runtime="python3.11",
             Role=get_role_name(),
-            Handler="lambda_function.lambda_handler",
+            Handler="lambda_function.mocked_lambda_handler_base",
             Code={"ZipFile": get_lambda_code()},
             Description="test lambda function",
             Timeout=3,
@@ -226,3 +244,180 @@ class TestLambdaInvocations:
         results = json.loads(invoke_res["Payload"].read().decode("utf-8"))
         logger.info("results: %s", results)
         assert results["errorType"] == "NoEvaluatorRegexMatched"
+
+
+class TestInitiatorLambda:
+    mock = mock_aws()
+
+    @classmethod
+    def setup_class(cls):
+        cls.mock.start()
+        cls.lambda_client = boto3.client("lambda")
+        cls.function_name = str(uuid4())[0:6]
+        cls.logs_client = boto3.client("logs")
+
+        cls.s3_client = boto3.client("s3")
+        cls.bucket_name = "test_bucket"
+        cls.bucket = cls.s3_client.create_bucket(
+            Bucket=cls.bucket_name,
+            CreateBucketConfiguration={
+                "LocationConstraint": os.environ["AWS_DEFAULT_REGION"]
+            },
+        )
+
+        # create mock SNS topic for initiator
+        cls.sns_client = boto3.client("sns")
+        cls.sns_topic_initiator = cls.sns_client.create_topic(Name="initiator_topic")
+
+        # create mock SQS queues
+        cls.sqs_client = boto3.client("sqs")
+        cls.sqs_queue_initiator = cls.sqs_client.create_queue(
+            QueueName="initiator_queue"
+        )
+        cls.sqs_queue_initiator_attr = cls.sqs_client.get_queue_attributes(
+            QueueUrl=cls.sqs_queue_initiator["QueueUrl"], AttributeNames=["QueueArn"]
+        )
+
+        # subscribe SQS queue to SNS topic
+        cls.sns_client.subscribe(
+            TopicArn=cls.sns_topic_initiator["TopicArn"],
+            Protocol="sqs",
+            Endpoint=cls.sqs_queue_initiator_attr["Attributes"]["QueueArn"],
+        )
+
+        # Set S3 to send ObjectCreated to SNS
+        cls.s3_client.put_bucket_notification_configuration(
+            Bucket=cls.bucket_name,
+            NotificationConfiguration={
+                "TopicConfigurations": [
+                    {
+                        "Id": "SomeID",
+                        "TopicArn": cls.sns_topic_initiator["TopicArn"],
+                        "Events": ["s3:ObjectCreated:*"],
+                    }
+                ]
+            },
+        )
+
+        # we should receive a test message
+        messages = cls.sqs_client.receive_message(
+            QueueUrl=cls.sqs_queue_initiator["QueueUrl"], MaxNumberOfMessages=10
+        )
+        assert len(messages["Messages"]) == 1
+        # print("SQS message:")
+        # print(json.dumps(messages["Messages"], indent=2))
+        cls.sqs_client.delete_message(
+            QueueUrl=cls.sqs_queue_initiator["QueueUrl"],
+            ReceiptHandle=messages["Messages"][0]["ReceiptHandle"],
+        )
+        message_body = messages["Messages"][0]["Body"]
+        sns_message = json.loads(message_body)
+        assert sns_message["Type"] == "Notification"
+        # print("SNS message:")
+        # print(json.dumps(sns_message, indent=2))
+
+        # get S3 notification from SNS message
+        s3_message_body = json.loads(sns_message["Message"])
+        assert s3_message_body["Event"] == "s3:TestEvent"
+        # print("S3 message:")
+        # print(json.dumps(s3_message_body, indent=2))
+
+        # TODO: Should use either AppConfig or retrieve router config from S3 location.
+        # For now, writing out router config body to env variable to pass to lambda.
+        cls.router_file = files("tests.resources").joinpath("test_router.yaml")
+        with open(cls.router_file) as f:
+            cls.router_cfg = f.read()
+
+        cls.fxn = cls.lambda_client.create_function(
+            FunctionName=cls.function_name,
+            Runtime="python3.11",
+            Role=get_role_name(),
+            Handler="lambda_function.mocked_lambda_handler_initiator",
+            Code={"ZipFile": get_lambda_code()},
+            Description="test lambda function",
+            Timeout=3,
+            MemorySize=128,
+            Publish=True,
+            Environment={"Variables": {"ROUTER_CFG": cls.router_cfg}},
+        )
+
+        # create event source mapping
+        cls.lambda_client.create_event_source_mapping(
+            EventSourceArn=cls.sqs_queue_initiator_attr["Attributes"]["QueueArn"],
+            FunctionName=cls.fxn["FunctionName"],
+        )
+
+    @classmethod
+    def teardown_class(cls):
+        try:
+            cls.mock.stop()
+        except RuntimeError:
+            pass
+
+    def invoke_initiator_via_s3_event(self, bucket, object_prefix):
+        """Test invocations of the initiator lambda via S3 event."""
+
+        # Upload file to trigger notification
+        self.s3_client.put_object(Bucket=bucket, Key=object_prefix, Body=b"asdf1324")
+
+        # get lambda execution status via logs
+        lambda_execution_success = False
+        start = time.time()
+        while (time.time() - start) < 30:
+            result = self.logs_client.describe_log_streams(
+                logGroupName=f"/aws/lambda/{self.function_name}"
+            )
+            log_streams = result.get("logStreams")
+            if not log_streams:
+                time.sleep(0.5)
+                continue
+            assert len(log_streams) >= 1
+            result = self.logs_client.get_log_events(
+                logGroupName=f"/aws/lambda/{self.function_name}",
+                logStreamName=log_streams[0]["logStreamName"],
+            )
+            for event in result.get("events"):
+                logger.info("log event: %s", event)
+                if '"success":true' in event["message"]:
+                    lambda_execution_success = True
+                    break
+            if lambda_execution_success:
+                break
+            time.sleep(0.5)
+        return lambda_execution_success
+
+    def test_initiator_sbg(self):
+        """Test invocations of the initiator lambda via S3 event using SBG test case: submit_to_sns_topic"""
+
+        # Upload file to trigger notification
+        assert self.invoke_initiator_via_s3_event(
+            self.bucket_name,
+            "prefix/SISTER_EMIT_L1B_RDN_20240103T131936_001/SISTER_EMIT_L1B_RDN_20240103T131936_001_OBS.bin",
+        )
+
+    def test_initiator_m2020(self):
+        """Test invocations of the initiator lambda via S3 event using M2020 test case: submit_to_sns_topic"""
+
+        # Upload file to trigger notification
+        assert self.invoke_initiator_via_s3_event(
+            self.bucket_name,
+            "ids-pipeline/pipes/nonlin_xyz_left/inputque/ML01234567891011121_000RAS_N01234567890101112131415161.VIC-link",
+        )
+
+    def test_initiator_nisar_tlm(self):
+        """Test invocations of the initiator lambda via S3 event using NISAR TLM test case: submit_to_sns_topic"""
+
+        # Upload file to trigger notification
+        assert self.invoke_initiator_via_s3_event(
+            self.bucket_name,
+            "prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc29",
+        )
+
+    def test_initiator_nisar_ldf(self):
+        """Test invocations of the initiator lambda via S3 event using NISAR LDF test case: submit_dag_by_id"""
+
+        # Upload file to trigger notification
+        assert self.invoke_initiator_via_s3_event(
+            self.bucket_name,
+            "prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_18_03_05_087077000.ldf",
+        )
