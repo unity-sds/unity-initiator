@@ -51,7 +51,9 @@ This guide provides a quick way to get started with our project. Please see our 
 
 ### Requirements
 
-* [INSERT LIST OF REQUIREMENTS HERE]
+* python 3.9+
+* docker
+* hatch
 
 <!-- ☝️ Replace with a numbered list of your requirements, including hardware if applicable ☝️ -->
 
@@ -75,13 +77,53 @@ This guide provides a quick way to get started with our project. Please see our 
 
 ### Build Instructions (if applicable)
 
-1. [INSERT STEP-BY-STEP BUILD INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
-
+1. Clone repo:
+   ```
+   git clone https://github.com/unity-sds/unity-initiator.git
+   ```
+1. Install hatch:
+   ```
+   pip install hatch
+   ```
+1. Build virtualenv and install dependencies:
+   ```
+   cd unity-initiator
+   hatch env create
+   ```
+1. Enter environment:
+   ```
+   hatch shell
+   ```
+1. Build:
+   ```
+   hatch build
+   ```
+   Wheel and tarballs will be built in the `dist/` directory:
+   ```
+   $ tree dist
+   dist
+   ├── unity_initiator-0.0.1-py3-none-any.whl
+   └── unity_initiator-0.0.1.tar.gz
+   
+   1 directory, 2 files
+   ```
+   
 <!-- ☝️ Replace with a numbered list of your build instructions, including expected results / outputs with optional screenshots ☝️ -->
 
 ### Test Instructions (if applicable)
 
-1. [INSERT STEP-BY-STEP TEST INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
+1. Enter environment:
+   ```
+   hatch shell
+   ```
+1. Run tests:
+   ```
+   hatch run pytest
+   ```
+   For more information during test runs, set the log level accordingly. For example:
+   ```
+   hatch run pytest -s -v --log-cli-level=INFO --log-level=INFO
+   ```
 
 <!-- ☝️ Replace with a numbered list of your test instructions, including expected results / outputs with optional screenshots ☝️ -->
 
