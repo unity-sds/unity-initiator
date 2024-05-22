@@ -75,7 +75,7 @@ This guide provides a quick way to get started with our project. Please see our 
 
 <!-- ☝️ Replace with a list of your usage examples, including screenshots if possible, and link to external documentation for details ☝️ -->
 
-### Build Instructions (if applicable)
+### Build Instructions
 
 1. Clone repo:
    ```
@@ -110,7 +110,7 @@ This guide provides a quick way to get started with our project. Please see our 
    
 <!-- ☝️ Replace with a numbered list of your build instructions, including expected results / outputs with optional screenshots ☝️ -->
 
-### Test Instructions (if applicable)
+### Test Instructions
 
 1. Enter environment:
    ```
