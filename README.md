@@ -55,25 +55,7 @@ This guide provides a quick way to get started with our project. Please see our 
 
 <!-- ☝️ Replace with a numbered list of your requirements, including hardware if applicable ☝️ -->
 
-### Setup Instructions
-
-1. [INSERT STEP-BY-STEP SETUP INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
-
-<!-- ☝️ Replace with a numbered list of how to set up your software prior to running ☝️ -->
-
-### Run Instructions
-
-1. [INSERT STEP-BY-STEP RUN INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
-
-<!-- ☝️ Replace with a numbered list of your run instructions, including expected results ☝️ -->
-
-### Usage Examples
-
-* [INSERT LIST OF COMMON USAGE EXAMPLES HERE, WITH OPTIONAL SCREENSHOTS]
-
-<!-- ☝️ Replace with a list of your usage examples, including screenshots if possible, and link to external documentation for details ☝️ -->
-
-### Build Instructions
+### Setup Instructions for Development
 
 1. Clone repo:
    ```
@@ -88,6 +70,32 @@ This guide provides a quick way to get started with our project. Please see our 
    cd unity-initiator
    hatch env create
    ```
+1. Install pre-commit:
+   ```
+   pip install pre-commit
+   pre-commit install
+   ```
+1. Test pre-commit run:
+   ```
+   pre-commit run --all-files
+   ```
+   You should see the following output:
+   ```
+   check for merge conflicts................................................Passed
+   check for broken symlinks............................(no files to check)Skipped
+   trim trailing whitespace.................................................Passed
+   isort....................................................................Passed
+   black....................................................................Passed
+   ruff.....................................................................Passed
+   bandit...................................................................Passed
+   prospector...............................................................Passed
+   ```
+
+<!-- ☝️ Replace with a numbered list of how to set up your software prior to running ☝️ -->
+
+### Build Instructions
+
+1. Follow [Setup Instructions for Development](#setup-instructions-for-development) above.
 1. Enter environment:
    ```
    hatch shell
@@ -110,6 +118,7 @@ This guide provides a quick way to get started with our project. Please see our 
 
 ### Test Instructions
 
+1. Follow [Setup Instructions for Development](#setup-instructions-for-development) above.
 1. Enter environment:
    ```
    hatch shell
@@ -124,6 +133,18 @@ This guide provides a quick way to get started with our project. Please see our 
    ```
 
 <!-- ☝️ Replace with a numbered list of your test instructions, including expected results / outputs with optional screenshots ☝️ -->
+
+### Run Instructions
+
+1. [INSERT STEP-BY-STEP RUN INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
+
+<!-- ☝️ Replace with a numbered list of your run instructions, including expected results ☝️ -->
+
+### Usage Examples
+
+* [INSERT LIST OF COMMON USAGE EXAMPLES HERE, WITH OPTIONAL SCREENSHOTS]
+
+<!-- ☝️ Replace with a list of your usage examples, including screenshots if possible, and link to external documentation for details ☝️ -->
 
 ## Changelog
 
