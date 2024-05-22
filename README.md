@@ -3,7 +3,7 @@
 
 <div align="center">
 
-![initiators_diagram](https://github.com/unity-sds/unity-initiator/assets/387300/a698a19d-7204-486f-a942-7c9b6f789cb1)
+![logo](https://user-images.githubusercontent.com/3129134/163255685-857aa780-880f-4c09-b08c-4b53bf4af54d.png)
 
 <h1 align="center">Unity Initiator</h1>
 <!-- ☝️ Replace with your repo name ☝️ -->
@@ -17,7 +17,7 @@
 
 [![Python package](https://github.com/unity-sds/unity-initiator/actions/workflows/python-package.yml/badge.svg)](https://github.com/unity-sds/unity-initiator/actions/workflows/python-package.yml)
 
-[INSERT SCREENSHOT OF YOUR SOFTWARE, IF APPLICABLE]
+![initiators_diagram](https://github.com/unity-sds/unity-initiator/assets/387300/a698a19d-7204-486f-a942-7c9b6f789cb1)
 <!-- ☝️ Screenshot of your software (if applicable) via ![](https://uri-to-your-screenshot) ☝️ -->
 
 [INSERT MORE DETAILED DESCRIPTION OF YOUR REPOSITORY HERE]
