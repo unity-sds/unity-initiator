@@ -3,9 +3,7 @@
 
 <div align="center">
 
-[INSERT YOUR LOGO IMAGE HERE (IF APPLICABLE)]
-<!-- ☝️ Replace with your logo (if applicable) via ![](https://uri-to-your-logo-image) ☝️ -->
-<!-- ☝️ If you see logo rendering errors, make sure you're not using indentation, or try an HTML IMG tag -->
+![initiators_diagram](https://github.com/unity-sds/unity-initiator/assets/387300/a698a19d-7204-486f-a942-7c9b6f789cb1)
 
 <h1 align="center">Unity Initiator</h1>
 <!-- ☝️ Replace with your repo name ☝️ -->
