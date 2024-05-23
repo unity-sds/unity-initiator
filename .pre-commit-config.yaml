@@ -1,7 +1,7 @@
 fail_fast: true
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       # Git style
       - id: check-merge-conflict
@@ -9,7 +9,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
         args: ["--profile", "black", "--filter-files"]
@@ -27,7 +27,7 @@ repos:
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.4.2
+    rev: v0.4.5
     hooks:
       - id: ruff
         args: ["--ignore", "E501,E402"]
@@ -39,6 +39,25 @@ repos:
         args: ["--severity-level=high", "--confidence-level=high"]
 
   - repo: https://github.com/PyCQA/prospector
-    rev: 1.10.0
+    rev: v1.10.3
     hooks:
       - id: prospector
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.90.0 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
+    hooks:
+      # Terraform Tests
+      - id: terraform_fmt
+      - id: terraform_docs
+        args:
+          - --hook-config=--path-to-file=README.md # Valid UNIX path. I.e. ../TFDOC.md or docs/README.md etc.
+          - --hook-config=--add-to-existing-file=true # Boolean. true or false
+          - --hook-config=--create-file-if-not-exist=true # Boolean. true or false
+      - id: terraform_validate
+      - id: terraform_providers_lock
+      - id: terraform_tflint
+      - id: terraform_tfsec
+        args:
+          - >
+            --args=--minimum-severity=CRITICAL
+            --no-color

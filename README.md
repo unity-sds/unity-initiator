@@ -70,10 +70,9 @@ This guide provides a quick way to get started with our project. Please see our 
    cd unity-initiator
    hatch env create
    ```
-1. Install pre-commit:
+1. Install dev tools:
    ```
-   pip install pre-commit
-   pre-commit install
+   ./scripts/install_dev_tools.sh
    ```
 1. Test pre-commit run:
    ```
@@ -81,14 +80,20 @@ This guide provides a quick way to get started with our project. Please see our 
    ```
    You should see the following output:
    ```
-   check for merge conflicts................................................Passed
-   check for broken symlinks............................(no files to check)Skipped
-   trim trailing whitespace.................................................Passed
-   isort....................................................................Passed
-   black....................................................................Passed
-   ruff.....................................................................Passed
-   bandit...................................................................Passed
-   prospector...............................................................Passed
+   check for merge conflicts...............................................................Passed
+   check for broken symlinks...........................................(no files to check)Skipped
+   trim trailing whitespace................................................................Passed
+   isort...................................................................................Passed
+   black...................................................................................Passed
+   ruff....................................................................................Passed
+   bandit..................................................................................Passed
+   prospector..............................................................................Passed
+   Terraform fmt...........................................................................Passed
+   Terraform docs..........................................................................Passed
+   Terraform validate......................................................................Passed
+   Lock terraform provider versions........................................................Passed
+   Terraform validate with tflint..........................................................Passed
+   Terraform validate with tfsec (deprecated, use "terraform_trivy").......................Passed
    ```
 
 <!-- ☝️ Replace with a numbered list of how to set up your software prior to running ☝️ -->
