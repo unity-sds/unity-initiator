@@ -3,6 +3,8 @@ import os
 from html import unescape
 from tempfile import mkstemp
 
+import smart_open
+
 from ..router import Router
 from ..utils.logger import logger
 
@@ -11,14 +13,23 @@ ROUTER = None
 
 def lambda_handler_base(event, context):
     """Base lambda handler that instantiates a router, globally, and executes actions for a single payload."""
+
     logger.info("context: %s", context)
 
-    # TODO: Should use either AppConfig or retrieve router config from S3 location.
-    # For now, reading router config body from ROUTER_CFG env variable then writing
-    # to local file.
+    # TODO: Should use AppConfig. For now, either reading router config body in ROUTER_CFG env variable
+    # or from a url in ROUTER_CFG_URL env variable.
     global ROUTER
     if ROUTER is None:
-        router_cfg = os.environ["ROUTER_CFG"]
+        router_cfg = os.environ.get("ROUTER_CFG", "").strip()
+        router_cfg_url = os.environ.get("ROUTER_CFG_URL", "").strip()
+        if router_cfg == "":
+            if router_cfg_url != "":
+                with smart_open.open(router_cfg_url, "r") as f:
+                    router_cfg = f.read()
+            else:
+                raise RuntimeError(
+                    "No router configuration specified via ROUTER_CFG or ROUTER_CFG_URL env variables."
+                )
         fd, router_file = mkstemp(prefix="router_", suffix=".yaml", text=True)
         with os.fdopen(fd, "w") as f:
             f.write(router_cfg)

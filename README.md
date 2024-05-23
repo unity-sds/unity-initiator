@@ -110,10 +110,10 @@ This guide provides a quick way to get started with our project. Please see our 
    dist
    ├── unity_initiator-0.0.1-py3-none-any.whl
    └── unity_initiator-0.0.1.tar.gz
-   
+
    1 directory, 2 files
    ```
-   
+
 <!-- ☝️ Replace with a numbered list of your build instructions, including expected results / outputs with optional screenshots ☝️ -->
 
 ### Test Instructions

@@ -8,6 +8,7 @@ import boto3
 import docker
 import pytest
 import respx
+import smart_open
 from botocore.exceptions import ClientError
 from httpx import Response
 from importlib_resources import files
@@ -24,14 +25,34 @@ os.environ["MOTO_ALLOW_NONEXISTENT_REGION"] = "True"
 os.environ["AWS_DEFAULT_REGION"] = "hilo-hawaii-1"
 
 
+# test bucket for mock
+TEST_BUCKET = "test_bucket"
+
+
 def setup_mock_resources():
     """Create mocked AWS and Airflow resources."""
 
+    # create router config in mock S3 bucket
+    # TODO: Should use AppConfig. For now, writing out router config to
+    # an S3 url to pass in as the ROUTER_CFG_URL env variable.
+    router_file = files("tests.resources").joinpath("test_router.yaml")
+    with open(router_file) as f:
+        router_cfg = f.read()
+    s3_client = boto3.client("s3")
+    s3_client.create_bucket(
+        Bucket=TEST_BUCKET,
+        CreateBucketConfiguration={
+            "LocationConstraint": os.environ["AWS_DEFAULT_REGION"]
+        },
+    )
+    with smart_open.open(f"s3://{TEST_BUCKET}/test_router.yaml", "w") as f:
+        f.write(router_cfg)
+
     # create mock SNS topics
-    client = boto3.client("sns")
-    client.create_topic(Name="eval_sbg_l2_readiness")
-    client.create_topic(Name="eval_m2020_xyz_left_finder")
-    client.create_topic(Name="eval_nisar_ingest")
+    sns_client = boto3.client("sns")
+    sns_client.create_topic(Name="eval_sbg_l2_readiness")
+    sns_client.create_topic(Name="eval_m2020_xyz_left_finder")
+    sns_client.create_topic(Name="eval_nisar_ingest")
 
     # mock airflow REST API
     respx.post("https://example.com/api/v1/dags/eval_nisar_l0a_readiness/dagRuns").mock(
@@ -136,8 +157,8 @@ class TestLambdaInvocations:
         cls.client = boto3.client("lambda")
         cls.function_name = str(uuid4())[0:6]
 
-        # TODO: Should use either AppConfig or retrieve router config from S3 location.
-        # For now, writing out router config body to env variable to pass to lambda.
+        # TODO: Should use AppConfig. For now, writing out router config body to
+        # the ROUTER_CFG env variable.
         cls.router_file = files("tests.resources").joinpath("test_router.yaml")
         with open(cls.router_file) as f:
             cls.router_cfg = f.read()
@@ -257,7 +278,7 @@ class TestInitiatorLambda:
         cls.logs_client = boto3.client("logs")
 
         cls.s3_client = boto3.client("s3")
-        cls.bucket_name = "test_bucket"
+        cls.bucket_name = TEST_BUCKET
         cls.bucket = cls.s3_client.create_bucket(
             Bucket=cls.bucket_name,
             CreateBucketConfiguration={
@@ -304,8 +325,7 @@ class TestInitiatorLambda:
             QueueUrl=cls.sqs_queue_initiator["QueueUrl"], MaxNumberOfMessages=10
         )
         assert len(messages["Messages"]) == 1
-        # print("SQS message:")
-        # print(json.dumps(messages["Messages"], indent=2))
+        logger.debug("SQS message: %s", json.dumps(messages["Messages"], indent=2))
         cls.sqs_client.delete_message(
             QueueUrl=cls.sqs_queue_initiator["QueueUrl"],
             ReceiptHandle=messages["Messages"][0]["ReceiptHandle"],
@@ -313,21 +333,14 @@ class TestInitiatorLambda:
         message_body = messages["Messages"][0]["Body"]
         sns_message = json.loads(message_body)
         assert sns_message["Type"] == "Notification"
-        # print("SNS message:")
-        # print(json.dumps(sns_message, indent=2))
+        logger.debug("SNS message: %s", json.dumps(sns_message, indent=2))
 
         # get S3 notification from SNS message
         s3_message_body = json.loads(sns_message["Message"])
         assert s3_message_body["Event"] == "s3:TestEvent"
-        # print("S3 message:")
-        # print(json.dumps(s3_message_body, indent=2))
+        logger.debug("S3 message: %s", json.dumps(s3_message_body, indent=2))
 
-        # TODO: Should use either AppConfig or retrieve router config from S3 location.
-        # For now, writing out router config body to env variable to pass to lambda.
-        cls.router_file = files("tests.resources").joinpath("test_router.yaml")
-        with open(cls.router_file) as f:
-            cls.router_cfg = f.read()
-
+        # create mocked initiator lambda
         cls.fxn = cls.lambda_client.create_function(
             FunctionName=cls.function_name,
             Runtime="python3.11",
@@ -338,7 +351,11 @@ class TestInitiatorLambda:
             Timeout=3,
             MemorySize=128,
             Publish=True,
-            Environment={"Variables": {"ROUTER_CFG": cls.router_cfg}},
+            Environment={
+                "Variables": {
+                    "ROUTER_CFG_URL": f"s3://{cls.bucket_name}/test_router.yaml"
+                }
+            },
         )
 
         # create event source mapping
