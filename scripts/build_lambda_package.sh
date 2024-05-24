@@ -15,7 +15,5 @@ VERSION=$(hatch run python -c 'from importlib.metadata import version; print(ver
 echo "{\"version\": \"$VERSION\"}" > ${DIST_DIR}/version.json
 mkdir -p $PKG_DIR
 pip install -t $PKG_DIR ${DIST_DIR}/unity_initiator-*.whl
-cp ${TEST_DIR}/test_lambda.py $PKG_DIR/lambda_function.py
-cp -r ${TEST_DIR} $PKG_DIR/
 cd $PKG_DIR
-zip -rq ${DIST_DIR}/unity_initiator-${VERSION}-mock_lambda.zip .
+zip -rq ${DIST_DIR}/unity_initiator-${VERSION}-lambda.zip .

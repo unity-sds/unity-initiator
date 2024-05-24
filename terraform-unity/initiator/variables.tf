@@ -11,11 +11,21 @@ variable "deployment_name" {
 variable "project" {
   description = "The unity project its installed into"
   type        = string
-  default     = "UnknownProject"
+  default     = "uod"
 }
 
 variable "venue" {
   description = "The unity venue its installed into"
   type        = string
-  default     = "UnknownVenue"
+  default     = "dev"
+}
+
+variable "code_bucket" {
+  description = "The S3 bucket where lambda zip files will be stored and accessed"
+  type        = string
+}
+
+variable "config_bucket" {
+  description = "The S3 bucket where router configuration files will be stored and accessed"
+  type        = string
 }

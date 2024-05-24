@@ -1,50 +1,40 @@
-resource "aws_lambda_function" "initiator_lambda" {
-  function_name = "${var.deployment_name}-inititator"
+resource "null_resource" "build_lambda_package" {
+  triggers = { always_run = timestamp() }
+  provisioner "local-exec" {
+    command = <<EOF
+      set -ex
+      docker run --rm -v ${path.module}/../..:/var/task mlupin/docker-lambda:python3.9-build ./scripts/build_lambda_package.sh
+    EOF
+  }
+}
 
-  filename = "${path.module}/lambda.zip"
-  handler  = "lambda.lambda_handler"
-  runtime  = "python3.11"
-  role     = aws_iam_role.initiator_lambda_iam_role.arn
+resource "null_resource" "upload_lambda_package" {
+  depends_on = [null_resource.build_lambda_package]
+  provisioner "local-exec" {
+    command = <<EOF
+      set -ex
+      aws s3 cp ${path.module}/../../dist/unity_initiator-${jsondecode(data.local_file.version.content).version}-lambda.zip s3://${var.code_bucket}/
+    EOF
+  }
+}
+
+resource "aws_lambda_function" "initiator_lambda" {
+  depends_on    = [null_resource.upload_lambda_package] #, null_resource.upload_router_config]
+  function_name = "${var.project}-${var.venue}-${var.deployment_name}-inititator"
+  s3_bucket     = var.code_bucket
+  s3_key        = "unity_initiator-${jsondecode(data.local_file.version.content).version}-lambda.zip"
+  handler       = "unity_initiator.cloud.lambda_handler.lambda_handler_initiator"
+  runtime       = "python3.11"
+  role          = aws_iam_role.initiator_lambda_iam_role.arn
+  timeout       = 600
 
   environment {
     variables = {
-      ROUTER_CFG_URL = "s3://test_bucket/test_router.yaml"
+      ROUTER_CFG_URL = "s3://${var.config_bucket}/test_router.yaml"
     }
   }
-
-  vpc_config {
-    subnet_ids         = local.subnet_ids
-    security_group_ids = [aws_security_group.initiator_lambda_sg.id]
-  }
   tags = var.tags
 }
-
-resource "aws_security_group" "initiator_lambda_sg" {
-  name        = "${var.deployment_name}-initiator_lambda_sg"
-  description = "Security group for the initiator lambda service"
-  vpc_id      = data.aws_ssm_parameter.vpc_id.value
-
-  // Inbound rules
-  // Example: Allow HTTP and HTTPS
-  // ingress {
-  //   from_port   = 2049
-  //   to_port     = 2049
-  //   protocol    = "tcp"
-  //   cidr_blocks = ["0.0.0.0/0"]
-  // }
-
-  // Outbound rules
-  // Example: Allow all outbound traffic
-  // egress {
-  //   from_port   = 0
-  //   to_port     = 0
-  //   protocol    = "-1"
-  //   cidr_blocks = ["0.0.0.0/0"]
-  // }
-
-  tags = var.tags
-}
-
 
 resource "aws_iam_role" "initiator_lambda_iam_role" {
   name = "${var.deployment_name}-initiator_lambda_iam_role"
@@ -88,29 +78,18 @@ resource "aws_iam_policy" "initiator_lambda_policy" {
 
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_base_policy_attachment" {
-  role       = aws_iam_role.initiator_lambda_iam_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
 resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   role       = aws_iam_role.initiator_lambda_iam_role.name
   policy_arn = aws_iam_policy.initiator_lambda_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_base_policy_attachment" {
+  role       = aws_iam_role.initiator_lambda_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_ssm_parameter" "initiator_lambda_function_name" {
   name  = "/unity/${var.project}/${var.venue}/od/initiator/lambda-name"
   type  = "String"
   value = aws_lambda_function.initiator_lambda.function_name
-}
-
-
-output "lambda_function_arn" {
-  description = "The ARN of the Lambda function"
-  value       = aws_lambda_function.initiator_lambda.arn
-}
-
-output "lambda_function_name" {
-  description = "The name of the Lambda function"
-  value       = aws_lambda_function.initiator_lambda.function_name
 }
