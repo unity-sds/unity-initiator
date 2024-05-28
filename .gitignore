@@ -163,3 +163,8 @@ cython_debug/
 .terraform
 terraform.tfstate*
 .archive_files
+
+# terraform testing scripts
+env.sh
+provision.sh
+destroy.sh
