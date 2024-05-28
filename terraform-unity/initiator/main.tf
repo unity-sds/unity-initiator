@@ -31,7 +31,7 @@ resource "aws_lambda_function" "initiator_lambda" {
   handler       = "unity_initiator.cloud.lambda_handler.lambda_handler_initiator"
   runtime       = "python3.11"
   role          = aws_iam_role.initiator_lambda_iam_role.arn
-  timeout       = 600
+  timeout       = 900
 
   environment {
     variables = {
@@ -42,7 +42,7 @@ resource "aws_lambda_function" "initiator_lambda" {
 }
 
 resource "aws_iam_role" "initiator_lambda_iam_role" {
-  name = "${var.deployment_name}-initiator_lambda_iam_role"
+  name = "${var.project}-${var.venue}-${var.deployment_name}-initiator_lambda_iam_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -60,8 +60,8 @@ resource "aws_iam_role" "initiator_lambda_iam_role" {
 }
 
 resource "aws_iam_policy" "initiator_lambda_policy" {
-  name        = "${var.deployment_name}-initiator_lambda_policy"
-  description = "A policy for the Lambda function to access S3"
+  name        = "${var.project}-${var.venue}-${var.deployment_name}-initiator_lambda_policy"
+  description = "A policy for the initiator lambda function to access S3 and SQS"
 
   policy = jsonencode({
     "Version" : "2012-10-17",
@@ -77,6 +77,16 @@ resource "aws_iam_policy" "initiator_lambda_policy" {
         "Effect" : "Allow",
         "Action" : "s3:*Object",
         "Resource" : ["arn:aws:s3:::*"]
+      },
+      {
+        "Sid" : "AccessInitiatorSQS",
+        "Effect" = "Allow"
+        "Action" = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ],
+        "Resource" = [aws_sqs_queue.initiator_queue.arn]
       }
     ]
   })
@@ -97,4 +107,64 @@ resource "aws_ssm_parameter" "initiator_lambda_function_name" {
   name  = "/unity/${var.project}/${var.venue}/od/initiator/lambda-name"
   type  = "String"
   value = aws_lambda_function.initiator_lambda.function_name
+}
+
+
+resource "aws_sqs_queue" "initiator_dead_letter_queue" {
+  name                       = "${var.project}-${var.venue}-${var.deployment_name}-inititator_dead_letter_queue"
+  delay_seconds              = 0
+  max_message_size           = 2048
+  message_retention_seconds  = 1209600
+  receive_wait_time_seconds  = 0
+  visibility_timeout_seconds = 900
+}
+
+resource "aws_sqs_queue" "initiator_queue" {
+  name                       = "${var.project}-${var.venue}-${var.deployment_name}-inititator_queue"
+  delay_seconds              = 0
+  max_message_size           = 2048
+  message_retention_seconds  = 1209600
+  receive_wait_time_seconds  = 10
+  visibility_timeout_seconds = 900
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.initiator_dead_letter_queue.arn
+    maxReceiveCount     = 2
+  })
+}
+
+resource "aws_sns_topic" "initiator_topic" {
+  name = "${var.project}-${var.venue}-${var.deployment_name}-inititator_topic"
+}
+
+resource "aws_sqs_queue_policy" "initiator_queue_policy" {
+  queue_url = aws_sqs_queue.initiator_queue.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "sqs:SendMessage"
+        Resource  = aws_sqs_queue.initiator_queue.arn
+        Condition = {
+          ArnEquals = {
+            "aws:SourceArn" = aws_sns_topic.initiator_topic.arn
+          }
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_sns_topic_subscription" "initiator_subscription" {
+  topic_arn = aws_sns_topic.initiator_topic.arn
+  protocol  = "sqs"
+  endpoint  = aws_sqs_queue.initiator_queue.arn
+}
+
+resource "aws_lambda_event_source_mapping" "initiator_queue_event_source_mapping" {
+  batch_size       = 10
+  enabled          = true
+  event_source_arn = aws_sqs_queue.initiator_queue.arn
+  function_name    = aws_lambda_function.initiator_lambda.arn
 }
