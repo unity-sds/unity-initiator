@@ -60,8 +60,6 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_initiator_queue_arn"></a> [initiator\_queue\_arn](#output\_initiator\_queue\_arn) | The ARN of the initiator SQS queue |
+| <a name="output_initiator_lambda_arn"></a> [initiator\_lambda\_arn](#output\_initiator\_lambda\_arn) | The ARN of the initiator lambda function |
 | <a name="output_initiator_topic_arn"></a> [initiator\_topic\_arn](#output\_initiator\_topic\_arn) | The ARN of the initiator SNS topic |
-| <a name="output_lambda_function_arn"></a> [lambda\_function\_arn](#output\_lambda\_function\_arn) | The ARN of the Lambda function |
-| <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The name of the Lambda function |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
