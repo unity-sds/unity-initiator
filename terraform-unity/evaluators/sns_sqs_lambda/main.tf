@@ -15,7 +15,7 @@ resource "aws_lambda_function" "evaluator_lambda" {
   timeout          = 900
   filename         = "${path.root}/.archive_files/${var.evaluator_name}-evaluator_lambda.zip"
   source_code_hash = data.archive_file.evaluator_lambda_artifact.output_base64sha256
-  tags             = var.tags
+  tags             = local.tags
 }
 
 resource "aws_iam_role" "evaluator_lambda_iam_role" {
@@ -34,6 +34,7 @@ resource "aws_iam_role" "evaluator_lambda_iam_role" {
     ],
   })
   permissions_boundary = data.aws_iam_policy.mcp_operator_policy.arn
+  tags                 = local.tags
 }
 
 resource "aws_iam_policy" "evaluator_lambda_policy" {
@@ -67,7 +68,6 @@ resource "aws_iam_policy" "evaluator_lambda_policy" {
       }
     ]
   })
-
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
@@ -84,6 +84,7 @@ resource "aws_ssm_parameter" "evaluator_lambda_function_name" {
   name  = "/unity/${var.project}/${var.venue}/od/evaluator/${var.evaluator_name}"
   type  = "String"
   value = aws_lambda_function.evaluator_lambda.function_name
+  tags  = local.tags
 }
 
 
@@ -94,6 +95,7 @@ resource "aws_sqs_queue" "evaluator_dead_letter_queue" {
   message_retention_seconds  = 1209600
   receive_wait_time_seconds  = 0
   visibility_timeout_seconds = 900
+  tags                       = local.tags
 }
 
 resource "aws_sqs_queue" "evaluator_queue" {
@@ -107,6 +109,7 @@ resource "aws_sqs_queue" "evaluator_queue" {
     deadLetterTargetArn = aws_sqs_queue.evaluator_dead_letter_queue.arn
     maxReceiveCount     = 2
   })
+  tags = local.tags
 }
 
 resource "aws_sns_topic" "evaluator_topic" {

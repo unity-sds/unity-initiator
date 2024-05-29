@@ -14,6 +14,7 @@ resource "aws_s3_object" "lambda_package" {
   key        = "unity_initiator-${jsondecode(data.local_file.version.content).version}-lambda.zip"
   source     = "${path.module}/../../dist/unity_initiator-${jsondecode(data.local_file.version.content).version}-lambda.zip"
   etag       = filemd5("${path.module}/../../dist/unity_initiator-${jsondecode(data.local_file.version.content).version}-lambda.zip")
+  tags       = local.tags
 }
 
 resource "aws_s3_object" "router_config" {
@@ -21,6 +22,7 @@ resource "aws_s3_object" "router_config" {
   key    = basename(var.router_config)
   source = var.router_config
   etag   = filemd5(var.router_config)
+  tags   = local.tags
 }
 
 resource "aws_lambda_function" "initiator_lambda" {
@@ -38,7 +40,7 @@ resource "aws_lambda_function" "initiator_lambda" {
       ROUTER_CFG_URL = "s3://${aws_s3_object.router_config.bucket}/${aws_s3_object.router_config.key}"
     }
   }
-  tags = var.tags
+  tags = local.tags
 }
 
 resource "aws_iam_role" "initiator_lambda_iam_role" {
@@ -57,6 +59,7 @@ resource "aws_iam_role" "initiator_lambda_iam_role" {
     ],
   })
   permissions_boundary = data.aws_iam_policy.mcp_operator_policy.arn
+  tags                 = local.tags
 }
 
 resource "aws_iam_policy" "initiator_lambda_policy" {
@@ -90,7 +93,7 @@ resource "aws_iam_policy" "initiator_lambda_policy" {
       }
     ]
   })
-
+  tags = local.tags
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
@@ -112,6 +115,7 @@ resource "aws_ssm_parameter" "initiator_lambda_function_name" {
   name  = "/unity/${var.project}/${var.venue}/od/initiator/lambda-name"
   type  = "String"
   value = aws_lambda_function.initiator_lambda.function_name
+  tags  = local.tags
 }
 
 
@@ -135,10 +139,12 @@ resource "aws_sqs_queue" "initiator_queue" {
     deadLetterTargetArn = aws_sqs_queue.initiator_dead_letter_queue.arn
     maxReceiveCount     = 2
   })
+  tags = local.tags
 }
 
 resource "aws_sns_topic" "initiator_topic" {
   name = "${var.project}-${var.venue}-${var.deployment_name}-inititator_topic"
+  tags = local.tags
 }
 
 resource "aws_sqs_queue_policy" "initiator_queue_policy" {

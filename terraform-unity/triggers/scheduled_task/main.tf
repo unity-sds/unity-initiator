@@ -14,6 +14,7 @@ resource "aws_iam_role" "scheduled_task_lambda_iam_role" {
     ],
   })
   permissions_boundary = data.aws_iam_policy.mcp_operator_policy.arn
+  tags                 = local.tags
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_sns_policy_attachment" {
@@ -40,7 +41,7 @@ resource "aws_lambda_function" "scheduled_task_lambda" {
       INITIATOR_TOPIC_ARN = var.initiator_topic_arn
     }
   }
-  tags = var.tags
+  tags = local.tags
 }
 
 resource "aws_iam_role" "scheduler" {
@@ -58,6 +59,7 @@ resource "aws_iam_role" "scheduler" {
     ]
   })
   permissions_boundary = data.aws_iam_policy.mcp_operator_policy.arn
+  tags                 = local.tags
 }
 
 resource "aws_iam_policy" "scheduler" {

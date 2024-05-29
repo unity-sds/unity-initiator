@@ -44,7 +44,6 @@ No modules.
 | <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | The deployment name | `string` | n/a | yes |
 | <a name="input_initiator_topic_arn"></a> [initiator\_topic\_arn](#input\_initiator\_topic\_arn) | The ARN of the initiator SNS topic to publish S3 events to | `string` | n/a | yes |
 | <a name="input_project"></a> [project](#input\_project) | The unity project its installed into | `string` | `"uod"` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | AWS Tags | `map(string)` | n/a | yes |
 | <a name="input_venue"></a> [venue](#input\_venue) | The unity venue its installed into | `string` | `"dev"` | no |
 
 ## Outputs

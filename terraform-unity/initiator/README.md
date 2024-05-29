@@ -54,7 +54,6 @@ No modules.
 | <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | The deployment name | `string` | n/a | yes |
 | <a name="input_project"></a> [project](#input\_project) | The unity project its installed into | `string` | `"uod"` | no |
 | <a name="input_router_config"></a> [router\_config](#input\_router\_config) | The local path to the router configuration file to use | `string` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | AWS Tags | `map(string)` | n/a | yes |
 | <a name="input_venue"></a> [venue](#input\_venue) | The unity venue its installed into | `string` | `"dev"` | no |
 
 ## Outputs

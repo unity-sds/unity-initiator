@@ -49,7 +49,6 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_evaluator_name"></a> [evaluator\_name](#input\_evaluator\_name) | The evaluator name | `string` | n/a | yes |
 | <a name="input_project"></a> [project](#input\_project) | The unity project its installed into | `string` | `"uod"` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | AWS Tags | `map(string)` | n/a | yes |
 | <a name="input_venue"></a> [venue](#input\_venue) | The unity venue its installed into | `string` | `"dev"` | no |
 
 ## Outputs

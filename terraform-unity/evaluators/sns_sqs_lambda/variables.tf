@@ -1,8 +1,3 @@
-variable "tags" {
-  description = "AWS Tags"
-  type        = map(string)
-}
-
 variable "evaluator_name" {
   description = "The evaluator name"
   type        = string

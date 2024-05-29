@@ -1,8 +1,3 @@
-variable "tags" {
-  description = "AWS Tags"
-  type        = map(string)
-}
-
 variable "deployment_name" {
   description = "The deployment name"
   type        = string
