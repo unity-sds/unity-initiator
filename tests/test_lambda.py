@@ -375,7 +375,9 @@ class TestInitiatorLambda:
         """Test invocations of the initiator lambda via S3 event."""
 
         # Upload file to trigger notification
-        self.s3_client.put_object(Bucket=bucket, Key=object_prefix, Body=b"asdf1324")
+        self.s3_client.put_object(
+            Bucket=bucket, Key=object_prefix, Body=b"hawaii_no_ka_oi"
+        )
 
         # get lambda execution status via logs
         lambda_execution_success = False

@@ -45,21 +45,37 @@ def lambda_handler_multiple_payloads(event, context):
 
 
 def lambda_handler_initiator(event, context):
-    """Lambda handler that executes actions for a list of S3 notification events propagated through SNS->SQS."""
+    """Lambda handler that executes actions for a list of S3 notification events propagated through SNS->SQS or
+    from a scheduled task via EventBridge->Lambda."""
 
     logger.info("event: %s", json.dumps(event, indent=2))
     payloads = []
     for record in event["Records"]:
         body = json.loads(unescape(record["body"]))
-        body_message = json.loads(body["Message"])
-        if body_message.get("Event", None) == "s3:TestEvent":
+        message = json.loads(body["Message"])
+
+        # TODO: Find cleaner way of parsing payloads from a variety of sources (S3 event notification, EventBridge->Lambda).
+        # For now we use brittle assumptions on the payload structure for each of the supported sources.
+
+        # skip S3 test event
+        if message.get("Event", None) == "s3:TestEvent":
             logger.info("Skipped s3:TestEvent")
             continue
-        for rec in body_message["Records"]:
-            s3_info = rec["s3"]
-            payloads.append(
-                {
-                    "payload": f"s3://{s3_info['bucket']['name']}/{s3_info['object']['key']}"
-                }
-            )
+
+        # payload comes from S3 notification
+        if "Records" in message:
+            for rec in message["Records"]:
+                s3_info = rec["s3"]
+                payloads.append(
+                    {
+                        "payload": f"s3://{s3_info['bucket']['name']}/{s3_info['object']['key']}"
+                    }
+                )
+        # payload comes from EventBridge scheduled task
+        else:
+            if isinstance(message, list):
+                payloads.extend(message)
+            else:
+                payloads.append(message)
+
     return lambda_handler_multiple_payloads(payloads, context)
