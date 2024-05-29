@@ -25,7 +25,7 @@ resource "aws_s3_object" "router_config" {
 
 resource "aws_lambda_function" "initiator_lambda" {
   depends_on    = [aws_s3_object.lambda_package, aws_s3_object.router_config]
-  function_name = "${var.project}-${var.venue}-${var.deployment_name}-initiator"
+  function_name = "${var.project}-${var.venue}-${var.deployment_name}-inititator"
   s3_bucket     = var.code_bucket
   s3_key        = "unity_initiator-${jsondecode(data.local_file.version.content).version}-lambda.zip"
   handler       = "unity_initiator.cloud.lambda_handler.lambda_handler_initiator"
@@ -98,20 +98,25 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   policy_arn = aws_iam_policy.initiator_lambda_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_sns_policy_attachment" {
+  role       = aws_iam_role.initiator_lambda_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_base_policy_attachment" {
   role       = aws_iam_role.initiator_lambda_iam_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_ssm_parameter" "initiator_lambda_function_name" {
-  name  = "/unity/${var.project}/${var.venue}/od/initiator/${var.deployment_name}"
+  name  = "/unity/${var.project}/${var.venue}/od/initiator/lambda-name"
   type  = "String"
   value = aws_lambda_function.initiator_lambda.function_name
 }
 
 
 resource "aws_sqs_queue" "initiator_dead_letter_queue" {
-  name                       = "${var.project}-${var.venue}-${var.deployment_name}-initiator_dead_letter_queue"
+  name                       = "${var.project}-${var.venue}-${var.deployment_name}-inititator_dead_letter_queue"
   delay_seconds              = 0
   max_message_size           = 2048
   message_retention_seconds  = 1209600
@@ -120,7 +125,7 @@ resource "aws_sqs_queue" "initiator_dead_letter_queue" {
 }
 
 resource "aws_sqs_queue" "initiator_queue" {
-  name                       = "${var.project}-${var.venue}-${var.deployment_name}-initiator_queue"
+  name                       = "${var.project}-${var.venue}-${var.deployment_name}-inititator_queue"
   delay_seconds              = 0
   max_message_size           = 2048
   message_retention_seconds  = 1209600
@@ -133,7 +138,7 @@ resource "aws_sqs_queue" "initiator_queue" {
 }
 
 resource "aws_sns_topic" "initiator_topic" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-initiator_topic"
+  name = "${var.project}-${var.venue}-${var.deployment_name}-inititator_topic"
 }
 
 resource "aws_sqs_queue_policy" "initiator_queue_policy" {

@@ -46,6 +46,8 @@ class Router:
 
     def execute_actions(self, url):
         loop = asyncio.get_event_loop()
+        if loop.is_closed():
+            loop = asyncio.new_event_loop()
         results = loop.run_until_complete(self.resolve_async_actions(url))
         loop.close()
         return results

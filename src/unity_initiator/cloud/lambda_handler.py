@@ -47,10 +47,15 @@ def lambda_handler_multiple_payloads(event, context):
 def lambda_handler_initiator(event, context):
     """Lambda handler that executes actions for a list of S3 notification events propagated through SNS->SQS."""
 
+    logger.info("event: %s", json.dumps(event, indent=2))
     payloads = []
     for record in event["Records"]:
         body = json.loads(unescape(record["body"]))
-        for rec in json.loads(body["Message"])["Records"]:
+        body_message = json.loads(body["Message"])
+        if body_message.get("Event", None) == "s3:TestEvent":
+            logger.info("Skipped s3:TestEvent")
+            continue
+        for rec in body_message["Records"]:
             s3_info = rec["s3"]
             payloads.append(
                 {

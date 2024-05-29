@@ -120,7 +120,7 @@ resource "aws_sns_topic_policy" "evaluator_topic_policy" {
     Statement = [{
       Effect = "Allow"
       Principal = {
-        AWS = data.aws_caller_identity.current.account_id
+        AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
       }
       Action   = "SNS:Publish"
       Resource = aws_sns_topic.evaluator_topic.arn
