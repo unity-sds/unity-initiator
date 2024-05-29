@@ -31,6 +31,7 @@ class SubmitToSNSTopic(Action):
                 {
                     "payload": self._payload,
                     "payload_info": self._payload_info,
+                    "on_success": self._params["on_success"],
                 }
             ),
         )
