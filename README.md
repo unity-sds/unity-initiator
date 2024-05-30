@@ -432,94 +432,27 @@ This guide provides a quick way to get started with our project. Please see our 
 
 See our [CHANGELOG.md](CHANGELOG.md) for a history of our changes.
 
-See our [releases page]([INSERT LINK TO YOUR RELEASES PAGE]) for our key versioned releases.
+See our [releases page]([https://github.com/unity-sds/unity-initiator/releases]) for our key versioned releases.
 
 <!-- ☝️ Replace with links to your changelog and releases page ☝️ -->
 
 ## Frequently Asked Questions (FAQ)
 
-[INSERT LINK TO FAQ PAGE OR PROVIDE FAQ INLINE HERE]
-<!-- example link to FAQ PAGE>
-Questions about our project? Please see our: [FAQ]([INSERT LINK TO FAQ / DISCUSSION BOARD])
--->
-
-<!-- example FAQ inline format>
-1. Question 1
-   - Answer to question 1
-2. Question 2
-   - Answer to question 2
--->
-
-<!-- example FAQ inline with no questions yet>
 No questions yet. Propose a question to be added here by reaching out to our contributors! See support section below.
--->
 
 <!-- ☝️ Replace with a list of frequently asked questions from your project, or post a link to your FAQ on a discussion board ☝️ -->
 
 ## Contributing
 
-[INSERT LINK TO CONTRIBUTING GUIDE OR FILL INLINE HERE]
-<!-- example link to CONTRIBUTING.md>
 Interested in contributing to our project? Please see our: [CONTRIBUTING.md](CONTRIBUTING.md)
--->
 
-<!-- example inline contributing guide>
-1. Create an GitHub issue ticket describing what changes you need (e.g. issue-1)
-2. [Fork](INSERT LINK TO YOUR REPO FORK PAGE HERE, e.g. https://github.com/my_org/my_repo/fork) this repo
-3. Make your modifications in your own fork
-4. Make a pull-request in this repo with the code in your fork and tag the repo owner / largest contributor as a reviewer
-
-**Working on your first pull request?** See guide: [How to Contribute to an Open Source Project on GitHub](https://kcd.im/pull-request)
--->
-
-[INSERT LINK TO YOUR CODE_OF_CONDUCT.md OR SHARE TEXT HERE]
-<!-- example link to CODE_OF_CONDUCT.md>
 For guidance on how to interact with our team, please see our code of conduct located at: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
--->
 
-<!-- ☝️ Replace with a text describing how people may contribute to your project, or link to your contribution guide directly ☝️ -->
-
-[INSERT LINK TO YOUR GOVERNANCE.md OR SHARE TEXT HERE]
-<!-- example link to GOVERNANCE.md>
 For guidance on our governance approach, including decision-making process and our various roles, please see our governance model at: [GOVERNANCE.md](GOVERNANCE.md)
--->
 
 ## License
 
-See our: [LICENSE](LICENSE)
-<!-- ☝️ Replace with the text of your copyright and license, or directly link to your license file ☝️ -->
-
-## Support
-
-[INSERT CONTACT INFORMATION OR PROFILE LINKS TO MAINTAINERS AMONG COMMITTER LIST]
-
-<!-- example list of contacts>
-Key points of contact are: [@github-user-1](link to github profile) [@github-user-2](link to github profile)
--->
-
-<!-- ☝️ Replace with the key individuals who should be contacted for questions ☝️ -->
-
-# unity-initiator
-
-[![PyPI - Version](https://img.shields.io/pypi/v/unity-initiator.svg)](https://pypi.org/project/unity-initiator)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unity-initiator.svg)](https://pypi.org/project/unity-initiator)
-
------
-
-**Table of Contents**
-
-- [Installation](#installation)
-- [License](#license)
-
-## Installation
-
-```console
-pip install unity-initiator
-```
-
-## License
-
-`unity-initiator` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.o
+`unity-initiator` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
 
 ## References
 <a id="1">[1]</a>
