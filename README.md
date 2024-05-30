@@ -169,6 +169,10 @@ In this case, the router sees that the action is `submit_dag_by_id` and thus mak
 ## Contents
 
 * [Quick Start](#quick-start)
+  * [Setting Up the End-to-End Demo](#setting-up-the-end-to-end-demo)
+    * [Deploying the Inititator](#deploying-the-initiator)
+    * [Deploying an Example Evaluator](#deploying-an-example-evaluator-sns-topic-sqs-queue-lambda)
+    * [Deploying an S3 Event Notification Trigger](#deploying-an-s3-event-notification-trigger)
 * [Changelog](#changelog)
 * [FAQ](#frequently-asked-questions-faq)
 * [Contributing Guide](#contributing)
@@ -293,7 +297,7 @@ This guide provides a quick way to get started with our project. Please see our 
 1. Verify that the S3 event notification was correctly hooked up to the initiator by looking at the initiator Lambda's CloudWatch logs for a entry similar to this:
    ![cloudwatch_logs_s3_testevent](https://github.com/unity-sds/unity-initiator/assets/387300/460a0d0b-ee01-480d-afab-ba70185341fc)
 
-#### Verify End-to-End Functionality
+#### Verify End-to-End Functionality (part 1)
 1. Create some fake NISAR TLM files and stage them up to the ISL bucket under the ISL prefix:
    ```
    for i in $(echo 24 25 29); do
@@ -325,6 +329,8 @@ This guide provides a quick way to get started with our project. Please see our 
      --var initiator_topic_arn=${INITIATOR_TOPIC_ARN} \
      -auto-approve
    ```
+
+#### Verify End-to-End Functionality (part 2)
 1. The deployed EventBridge scheduler runs the trigger Lambda function with schedule expression of `rate(1 minute)`. After a minute, verify that the `eval_nisar_ingest` evaluator Lambda function was called successfully for each of those scheduled invocations by looking at its CloudWatch logs for entries similar to this:
    ![eval_log_2](https://github.com/unity-sds/unity-initiator/assets/387300/cae82e10-a736-43b7-8957-790fc29b5fea)
 
