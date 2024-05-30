@@ -29,14 +29,14 @@ The [Unity SDS](https://github.com/unity-sds) is an implementation of an SDS by 
 ### What are triggers?
 Trigger events are events that could potentially kick off processing in an SDS. Examples of trigger events are:
 
-1. A raw data file is deposited into a location (e.g. S3 bucket, local directory, etc.).
-1. A scheduled task runs and finds a new raw data file has been published to data repository (e.g. CMR, DAAC).
+1. A raw data file is deposited into a location e.g. S3 bucket, local directory, etc.
+1. A scheduled task runs and finds a new raw data file has been published to a data repository e.g. CMR (Common Metadata Repository), DAAC, etc.
 
-The different types of trigger events lend themselves to particular trigger implementations. Taking #1 as an example and specifically using the S3 bucket use case, an implementation of that trigger could be to use the native S3 event notification capability to notify the SDS that a new file was deposited in the bucket. For the local directory use case, the trigger implementation could be to use the python watchdog library to monitor a local directory and to notify the SDS when a new file has been deposited there.
+The different types of trigger events lend themselves to particular trigger implementations. Taking #1 as an example and specifically using the S3 bucket use case, an implementation of that trigger could be to use the native S3 event notification capability to notify the SDS that a new file was deposited in the bucket. For the local directory use case, the trigger implementation could be to use the python [watchdog library](https://pypi.org/project/watchdog/) to monitor a local directory and to notify the SDS when a new file has been deposited there.
 
-Taking #2 as an example, an implementation of that trigger would be a cron job running on a local machine that would start up a script that queries for new data using some remote API call which would then notify the SDS. An "all-in" cloud implementation of this trigger would be to use AWS EventBridge as the cron scheduler and AWS Lambda as the script that does the querying and SDS notification.
+Taking #2 as an example, an implementation of that trigger would be a cron job running on a local machine that would start up a script that queries for new data using some remote API call which would then notify the SDS. An "all-in" cloud implementation of this trigger would be to use AWS EventBridge as the cron scheduler and AWS Lambda as the "script" that does the querying and SDS notification.
 
-These are just a small subset of the different types of trigger events and their respective trigger implementations. The unity-initiator provides examples of some of these trigger implementations. More importantly, however, the unity-initator provides the common interface to which any trigger implementation can notify the SDS of the source triggering event. This common interface is called the initiator topic (SNS topic) and the following snippet of the above architecture diagram shows their interaction:
+These are just a small subset of the different types of trigger events and their respective trigger implementations. This unity-initiator github repository provides [examples](terraform-unity/triggers) of some of these trigger implementations. More importantly, however, the unity-initator provides the common interface to which any trigger implementation can notify the SDS of a triggering event. This common interface is called the initiator topic (implemented as an SNS topic) and the following screenshot from the above architecture diagram shows their interaction:
 
 ![triggers](https://github.com/unity-sds/unity-initiator/assets/387300/f7d26a4e-908d-4b0b-913b-4e7704a8a2a1)
 
