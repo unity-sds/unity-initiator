@@ -69,12 +69,90 @@ The following screenshot shows examples of both of these interfaces:
 
 ![evaluators](https://github.com/unity-sds/unity-initiator/assets/387300/b36aae2c-16a7-4b94-8721-020b7b375f25)
 
-It is left to the unity-initiator to perform the routing of triggers to their respective evaluators.
+It is the responsibility of the initiator to perform the routing of triggers to their respective evaluators.
 
-###
+### What is the Unity initiator?
+The Unity initiator is the set of compute resources that enable the routing of trigger events to their respective evaluators. It is agnostic of the trigger event source and agnostic of the adaptation-specific evaluator code. It is completely driven by configuration (a.k.a. router configuration YAML). The following screenshot shows the current architecture for the initiator:
+
+![initiator](https://github.com/unity-sds/unity-initiator/assets/387300/74f7c2cb-8542-4ad8-9212-e720077373c0)
+
+The initiator topic, an SNS topic, is the common interface that all triggers will submit events to. The initiator topic is subscribed to by the initiator SQS queue (complete with dead-letter queue for resiliency) which in turn is subscribed to by the router Lambda function. How the router Lambda routes payloads of the trigger events is described the router configuration YAML. The full YAML schema for the router configuration is located [here](src/unity_initiator/resources/routers_schema.yaml).
+
+#### How the router works
+In the context of trigger events where a new file is detected (payload_type=`url`), the router Lambda extracts the URL of the new file, instantiates a router object and attempts to match it up against of set of regular expressions defined in the router configuration file. Let's consider this minimal router configuration YAML file example:
+
+```
+initiator_config:
+  name: minimal config example
+  payload_type:
+    url:
+      - regexes:
+            - !!python/regexp '/(?P<id>(?P<Mission>NISAR)_S(?P<SCID>\d{3})_(?P<Station>\w{2,3})_(?P<Antenna>\w{3,4})_M(?P<Mode>\d{2})_P(?P<Pass>\d{5})_R(?P<Receiver>\d{2})_C(?P<Channel>\d{2})_G(?P<Group>\d{2})_(?P<FileCreationDateTime>\d{4}_\d{3}_\d{2}_\d{2}_\d{2}_\d{6})\d{3}\.vc(?P<VCID>\w{2}))$'
+        evaluators:
+          - name: eval_nisar_ingest
+            actions:
+              - name: submit_to_sns_topic
+                params:
+                  topic_arn: arn:aws:sns:hilo-hawaii-1:123456789012:eval_nisar_ingest
+                  on_success:
+                    actions:
+                      - name: submit_dag_by_id
+                        params:
+                          dag_id: submit_nisar_tlm_ingest
+                          airflow_base_api_endpoint: xxx
+                          airflow_username: <SSM parameter, e.g. /unity/airflow/username> <ARN to username entry in AWS Secrets Manager>
+                          airflow_password: <SSM parameter, e.g. /unity/airflow/password> <ARN to password entry in Secrets Manager>
+```
+
+and a trigger event payload for a new file that was triggered:
+```
+{
+  "payload": "s3://test_bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc29"
+}
+```
+
+The router will iterate over the set of url configs and attempt to match the URL against its set of regexes. If a match is successful, the router will iterate over the configured evaluators configs and perform the configured action to submit the URL payload to the evaluator interface (either SNS topic or DAG submission). In this case, the router sees that the action is `submit_to_sns_topic` and thus publishes the URL payload (and the regular expression captured groups as `payload_info`) to the SNS topic (`topic_arn`) configured in the action's parameters. In addition to the payload URL and the payload info, the router also includes the `on_success` parameters configured for the action. This will propagate pertinent info to the underlying evaluator code which would be used if evaluation is successful. In this case, if the evaulator successfully evaluates that everything is ready for this input file, it can proceed to submit a DAG run for the `submit_nisar_tlm_ingest` DAG in the underlying SPS.
+
+Let's consider another example but this time the configured action is to submit a DAG run instead of publishing to an evaluator's SNS topic: 
+```
+initiator_config:
+  name: minimal config example
+  payload_type:
+    url:
+      - regexes:
+            - !!python/regexp '/(?P<id>(?P<Mission>NISAR)_S(?P<SCID>\d{3})_(?P<Station>\w{2,3})_(?P<Antenna>\w{3,4})_M(?P<Mode>\d{2})_P(?P<Pass>\d{5})_R(?P<Receiver>\d{2})_C(?P<Channel>\d{2})_G(?P<Group>\d{2})_(?P<FileCreationDateTime>\d{4}_\d{3}_\d{2}_\d{2}_\d{2}_\d{5})(?P<R>\d{1,4})\.ldf)$'
+        evaluators:
+          - name: eval_nisar_l0a_readiness
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: eval_nisar_l0a_readiness
+                  airflow_base_api_endpoint: https://example.com/api/v1
+                  airflow_username: <SSM parameter, e.g. /unity/airflow/username> <ARN to username entry in AWS Secrets Manager>
+                  airflow_password: <SSM parameter, e.g. /unity/airflow/password> <ARN to password entry in Secrets Manager>
+                  on_success:
+                    actions:
+                      - name: submit_dag_by_id
+                        params:
+                          dag_id: submit_nisar_l0a_te_dag
+                          # These are commented out because by default they will be pulled from the above configuration since we're in airflow.
+                          # Otherwise these can be uncommented out for explicit configuration (e.g. another SPS cluster)
+                          #airflow_base_api_endpoint: xxx
+                          #airflow_username: <ARN to username entry in AWS Secrets Manager>
+                          #airflow_password: <ARN to password entry in Secrets Manager>
+```
+
+and a trigger event payload for a new file that was triggered:
+```
+{
+  "payload": "s3://test_bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.ldf"
+}
+```
+
+In this case, the router sees that the action is `submit_dag_by_id` and thus makes a REST call to SPS to submit the URL payload, payload info, and `on_success` parameters as a DAG run. If the evaulator, running now as a DAG in SPS instead of an AWS Lambda function, successfully evaluates that everything is ready for this input file, it can proceed to submit a DAG run for the `submit_nisar_l0a_te_dag` DAG in the underlying SPS.
+
 <!-- ☝️ Replace with a more detailed description of your repository, including why it was made and whom its intended for.  ☝️ -->
 
-[INSERT LIST OF IMPORTANT PROJECT / REPO LINKS HERE]
 <!-- example links>
 [Website](INSERT WEBSITE LINK HERE) | [Docs/Wiki](INSERT DOCS/WIKI SITE LINK HERE) | [Discussion Board](INSERT DISCUSSION BOARD LINK HERE) | [Issue Tracker](INSERT ISSUE TRACKER LINK HERE)
 -->
