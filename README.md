@@ -21,7 +21,7 @@
 <!-- ☝️ Screenshot of your software (if applicable) via ![](https://uri-to-your-screenshot) ☝️ -->
 
 ### What is Unity SDS?
-Quite simply, an SDS (Science Data System) is an orchestrated set of networked compute and storage resources that is adapted to process data through a pipeline. As described by [Hua et al. [2022]](#1):
+Quite simply, an SDS (Science Data System) is an orchestrated set of networked compute and storage resources that is adapted to process science data through a pipeline. As described by [Hua et al. [2022]](#1):
 > Science Data Systems (SDSes) provide the capability to develop, test, process, and analyze instrument observational data efficiently, systematically, and at large scales. SDSes ingest the raw satellite instrument observations and process them from low‐level instrument values into higher level observational measurement values that compose the science data products.
 
 The [Unity SDS](https://github.com/unity-sds) is an implementation of an SDS by the Unity project at NASA Jet Propulsion Laboratory.
@@ -29,20 +29,38 @@ The [Unity SDS](https://github.com/unity-sds) is an implementation of an SDS by 
 ### What are triggers?
 Trigger events are events that could potentially kick off processing in an SDS. Examples of trigger events are:
 
-1. A raw data file is deposited into a location e.g. S3 bucket, local directory, etc.
-1. A scheduled task runs and finds a new raw data file has been published to a data repository e.g. CMR (Common Metadata Repository), DAAC, etc.
+1. A raw data file is deposited into a location e.g. an S3 bucket or a local directory.
+1. A scheduled task runs and finds a new raw data file has been published to a data repository e.g. CMR (Common Metadata Repository), ASF DAAC's Vertex, etc.
 
 The different types of trigger events lend themselves to particular trigger implementations. Taking #1 as an example and specifically using the S3 bucket use case, an implementation of that trigger could be to use the native S3 event notification capability to notify the SDS that a new file was deposited in the bucket. For the local directory use case, the trigger implementation could be to use the python [watchdog library](https://pypi.org/project/watchdog/) to monitor a local directory and to notify the SDS when a new file has been deposited there.
 
 Taking #2 as an example, an implementation of that trigger would be a cron job running on a local machine that would start up a script that queries for new data using some remote API call which would then notify the SDS. An "all-in" cloud implementation of this trigger would be to use AWS EventBridge as the cron scheduler and AWS Lambda as the "script" that does the querying and SDS notification.
 
-These are just a small subset of the different types of trigger events and their respective trigger implementations. This unity-initiator github repository provides [examples](terraform-unity/triggers) of some of these trigger implementations. More importantly, however, the unity-initator provides the common interface to which any trigger implementation can notify the SDS of a triggering event. This common interface is called the initiator topic (implemented as an SNS topic) and the following screenshot from the above architecture diagram shows their interaction:
+These are just an initial subset of the different types of trigger events and their respective trigger implementations. This unity-initiator github repository provides [examples](terraform-unity/triggers) of some of these trigger implementations. More importantly, however, the unity-initator provides the common interface to which any trigger implementation can notify the SDS of a triggering event. This common interface is called the initiator topic (implemented as an SNS topic) and the following screenshot from the above architecture diagram shows their interaction:
 
 ![triggers](https://github.com/unity-sds/unity-initiator/assets/387300/f7d26a4e-908d-4b0b-913b-4e7704a8a2a1)
 
 Trigger events by themselves don't automatically mean that SDS processing is ready to proceed. That's what evaluators are for.
 
 ### What are evaluators?
+As described by [Hua et al. [2022]](#1):
+> A fundamental capability of an SDS is to systematically process science data through a series of data transformations from raw instrument data to geophysical measurements. Data are first made available to the SDS from GDS to be processed to higher level data products. The data transformation steps may utilize ancillary and auxiliary files as well as production rules that stipulate conditions for when each step should be executed.
+
+In an SDS, evaluators are functions (irrespective of how they are deployed and called) that perform adaptation-specific evaluation to determine if the next step in the processing pipeline is ready for execution. 
+
+As an example, the following shows the input-output diagram for the NISAR L-SAR L0B:
+
+![nisar_l0b](https://github.com/unity-sds/unity-initiator/assets/387300/395e73da-adb8-459c-a611-8fa9beb6f77f)
+
+The NISAR L-SAR L0B PGE is only executed when the evaluator function determines that:
+
+1. All input L0A files necessary to cover the L0B granule timespan are present in the SDS
+2. The following ancillary files for the input data timespan exist in the SDS and are of the correct fidelity (forecast vs. near vs. medium vs. precise): LRCLK-UTC, orbit ephemeris, radar pointing, radar config, BFPQ lookup tables, LSAR channel data.
+3. Metadata regarding NISAR-specific observation plan, CTZ (cycle time zero) and other orbit-related fields fields are available from these ancillary files: dCOP, oROST, STUF.
+
+Reality is that there are a few more things that are checked for during this evaluator run but the gist of the evaluation are the steps above.
+
+
 
 
 ###
