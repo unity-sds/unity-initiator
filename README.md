@@ -189,7 +189,7 @@ This guide provides a quick way to get started with our project. Please see our 
 
 <!-- ☝️ Replace with a numbered list of your requirements, including hardware if applicable ☝️ -->
 
-### Setting Up the End-to-end Demo
+### Setting Up the End-to-End Demo
 
 #### Deploying the Initiator
 
@@ -201,13 +201,13 @@ This guide provides a quick way to get started with our project. Please see our 
    ```
    cd unity-initiator/terraform-unity/initiator/
    ```
-1. Copy a sample router configuration YAML file to use for deployment and update the AWS region and AWS account ID to match your AWS environment:
+1. Copy a sample router configuration YAML file to use for deployment and update the AWS region and AWS account ID to match your AWS environment. We will be using the NISAR TLM test case for this demo so we also rename the SNS topic ARN for it accordingly:
    ```
    cp ../../tests/resources/test_router.yaml .
    export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text | awk '{print $1}')
    export AWS_REGION=$(aws configure get region)
    sed -i "s/hilo-hawaii-1/${AWS_REGION}/g" test_router.yaml
-   sed -i "s/123456789012/${AWS_ACCOUNT_ID}/g" test_router.yaml
+   sed -i "s/123456789012:eval_nisar_ingest/${AWS_ACCOUNT_ID}:uod-dev-eval_nisar_ingest-evaluator_topic/g" test_router.yaml
    ```
 1. You will need an S3 bucket for terraform to stage the router Lambda zip file during deployment. Create one or reuse an existing one and set an environment variable for it:
    ```
@@ -293,6 +293,19 @@ This guide provides a quick way to get started with our project. Please see our 
 1. Verify that the S3 event notification was correctly hooked up to the initiator by looking at the initiator Lambda's CloudWatch logs for a entry similar to this:
    ![cloudwatch_logs_s3_testevent](https://github.com/unity-sds/unity-initiator/assets/387300/460a0d0b-ee01-480d-afab-ba70185341fc)
 
+#### Verify End-to-End Functionality
+1. Create some fake NISAR TLM files and stage them up to the ISL bucket under the ISL prefix:
+   ```
+   for i in $(echo 24 25 29); do
+     echo 'Hawaii, No Ka Oi!' > NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc${i}
+     aws s3 cp NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc${i} s3://${ISL_BUCKET}/${ISL_BUCKET_PREFIX}
+     rm NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc${i}
+   done
+   ```
+1. Verify that the `eval_nisar_ingest` evaluator Lambda function was called successfully for each of those staged files by looking at its CloudWatch logs for entries similar to this:
+   ![eval_log_1](https://github.com/unity-sds/unity-initiator/assets/387300/34a273a5-5992-46f8-982b-0a0ec37d1798)
+
+
 ### Setup Instructions for Development
 
 1. Clone repo:
@@ -376,18 +389,6 @@ This guide provides a quick way to get started with our project. Please see our 
    ```
 
 <!-- ☝️ Replace with a numbered list of your test instructions, including expected results / outputs with optional screenshots ☝️ -->
-
-### Run Instructions
-
-1. [INSERT STEP-BY-STEP RUN INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
-
-<!-- ☝️ Replace with a numbered list of your run instructions, including expected results ☝️ -->
-
-### Usage Examples
-
-* [INSERT LIST OF COMMON USAGE EXAMPLES HERE, WITH OPTIONAL SCREENSHOTS]
-
-<!-- ☝️ Replace with a list of your usage examples, including screenshots if possible, and link to external documentation for details ☝️ -->
 
 ## Changelog
 
