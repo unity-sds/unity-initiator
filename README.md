@@ -189,7 +189,9 @@ This guide provides a quick way to get started with our project. Please see our 
 
 <!-- ☝️ Replace with a numbered list of your requirements, including hardware if applicable ☝️ -->
 
-### Deploying the Initiator
+### Setting Up End-to-end Demo
+
+#### Deploying the Initiator
 
 1. Clone repo:
    ```
@@ -198,10 +200,6 @@ This guide provides a quick way to get started with our project. Please see our 
 1. Change directory to the location of the inititator terraform:
    ```
    cd unity-initiator/terraform-unity/initiator/
-   ```
-1. Initialize terraform:
-   ```
-   terraform init
    ```
 1. Copy a sample router configuration YAML file to use for deployment and update the AWS region and AWS account ID to match your AWS environment:
    ```
@@ -223,6 +221,10 @@ This guide provides a quick way to get started with our project. Please see our 
    ```
    export DEPLOYMENT_NAME=gmanipon-test
    ```
+1. Initialize terraform:
+   ```
+   terraform init
+   ```
 1. Run terraform apply:
    ```
    terraform apply \
@@ -232,7 +234,33 @@ This guide provides a quick way to get started with our project. Please see our 
      --var router_config=test_router.yaml \
      -auto-approve
    ```
-1. 
+   **Take note of the `initiator_topic_arn` that is output by terraform. It will be used when setting up any triggers.**
+
+#### Deploying an Example Evaluator (SNS topic->SQS queue->Lambda)
+1. Change directory to the location of the sns_sqs_lambda evaluator terraform:
+   ```
+   cd ../evaluators/sns_sqs_lambda/
+   ```
+1. Set the name of the evaluator to our NISAR example:
+   ```
+   export EVALUATOR_NAME=eval_nisar_ingest
+   ```
+1. Note the implementation of the evaluator code. It currently doesn't do any real evaluation but simply returns that evaluation was successful:
+   ```
+   cat data.tf
+   ```
+1. Initialize terraform:
+   ```
+   terraform init
+   ```
+1. Run terraform apply:
+   ```
+   terraform apply \
+     --var evaluator_name=${EVALUATOR_NAME} \
+     -auto-approve
+   ```
+   **Take note of the `evaluator_topic_arn` that is output by terraform. It should match the topic ARN in the test_router.yaml file you used during the initiator deployment. If they match then the router Lambda is now able to submit payloads to this evaluator SNS topic.**
+   
 
 ### Setup Instructions for Development
 
