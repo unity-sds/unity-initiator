@@ -159,7 +159,10 @@ In this case, the router sees that the action is `submit_dag_by_id` and thus mak
 
 ## Features
 
-* [INSERT LIST OF FEATURES IMPORTANT TO YOUR USERS HERE]
+* Examples of triggers
+* Example templates of evaluators
+* Configuration-driven routing of trigger events to evaluators
+* Terraform script for easy of deploying the initiator, triggers, and evaluators
 
 <!-- ☝️ Replace with a bullet-point list of your features ☝️ -->
 
@@ -181,9 +184,55 @@ This guide provides a quick way to get started with our project. Please see our 
 * python 3.9+
 * docker
 * hatch
+* terraform
 * all other dependencies (defined in the [pyproject.toml](pyproject.toml)) will be installed and managed by hatch
 
 <!-- ☝️ Replace with a numbered list of your requirements, including hardware if applicable ☝️ -->
+
+### Deploying the Initiator
+
+1. Clone repo:
+   ```
+   git clone https://github.com/unity-sds/unity-initiator.git
+   ```
+1. Change directory to the location of the inititator terraform:
+   ```
+   cd unity-initiator/terraform-unity/initiator/
+   ```
+1. Initialize terraform:
+   ```
+   terraform init
+   ```
+1. Copy a sample router configuration YAML file to use for deployment and update the AWS region and AWS account ID to match your AWS environment:
+   ```
+   cp ../../tests/resources/test_router.yaml .
+   export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text | awk '{print $1}')
+   export AWS_REGION=$(aws configure get region)
+   sed -i "s/hilo-hawaii-1/${AWS_REGION}/g" test_router.yaml
+   sed -i "s/123456789012/${AWS_ACCOUNT_ID}/g" test_router.yaml
+   ```
+1. You will need an S3 bucket for terraform to stage the router Lambda zip file during deployment. Create one or reuse an existing one and set an environment variable for it:
+   ```
+   export CODE_BUCKET=<some S3 bucket name>
+   ```
+1. You will need an S3 bucket to store the router configuration YAML file. Create one or reuse an existing one (could be the same one in the previous step) and set an environment variable for it:
+   ```
+   export CONFIG_BUCKET=<some S3 bucket name>
+   ```
+1. Set a deployment name:
+   ```
+   export DEPLOYMENT_NAME=gmanipon-test
+   ```
+1. Run terraform apply:
+   ```
+   terraform apply \
+     --var deployment_name=${DEPLOYMENT_NAME} \
+     --var code_bucket=${CODE_BUCKET} \
+     --var config_bucket=${CONFIG_BUCKET} \
+     --var router_config=test_router.yaml \
+     -auto-approve
+   ```
+1. 
 
 ### Setup Instructions for Development
 
