@@ -305,7 +305,32 @@ This guide provides a quick way to get started with our project. Please see our 
 1. Verify that the `eval_nisar_ingest` evaluator Lambda function was called successfully for each of those staged files by looking at its CloudWatch logs for entries similar to this:
    ![eval_log_1](https://github.com/unity-sds/unity-initiator/assets/387300/34a273a5-5992-46f8-982b-0a0ec37d1798)
 
+#### Deploying an EventBridge Scheduler Trigger
+1. Change directory to the location of the s3_bucket_notification trigger terraform:
+   ```
+   cd ../scheduled_task/
+   ```
+1. Note the implementation of the trigger lambda code. It currently hard codes a payload URL however in a real implementation, code would be written to query for new files from some REST API, database, etc. Here we simulate that and simply return a NISAR TLM file:
+   ```
+   cat data.tf
+   ```
+1. Initialize terraform:
+   ```
+   terraform init
+   ```
+1. Run terraform apply. Note the DEPLOYMENT_NAME and INITIATOR_TOPIC_ARN environment variables should have been set in the previous steps. If not set them again:
+   ```
+   terraform apply \
+     --var deployment_name=${DEPLOYMENT_NAME} \
+     --var initiator_topic_arn=${INITIATOR_TOPIC_ARN} \
+     -auto-approve
+   ```
+1. The deployed EventBridge scheduler runs the trigger Lambda function with schedule expression of `rate(1 minute)`. After a minute, verify that the `eval_nisar_ingest` evaluator Lambda function was called successfully for each of those scheduled invocations by looking at its CloudWatch logs for entries similar to this:
+   ![eval_log_2](https://github.com/unity-sds/unity-initiator/assets/387300/cae82e10-a736-43b7-8957-790fc29b5fea)
 
+#### Tear Down
+1. Simply go back into each of the terraform directories for which `terraform apply` was run and run `terraform destroy`.
+   
 ### Setup Instructions for Development
 
 1. Clone repo:
