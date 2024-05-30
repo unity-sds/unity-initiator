@@ -10,7 +10,7 @@
 
 </div>
 
-<pre align="center">A framework for implementing triggers that initiate evaluation actions in Unity subsystems (e.g. SPS)</pre>
+<pre align="center">A framework for implementing triggers and evaluators in the Unity SDS</pre>
 <!-- ☝️ Replace with a single sentence describing the purpose of your repo / proj ☝️ -->
 
 <!-- Header block for project -->
@@ -20,7 +20,32 @@
 ![initiators_diagram](https://github.com/unity-sds/unity-initiator/assets/387300/a698a19d-7204-486f-a942-7c9b6f789cb1)
 <!-- ☝️ Screenshot of your software (if applicable) via ![](https://uri-to-your-screenshot) ☝️ -->
 
-[INSERT MORE DETAILED DESCRIPTION OF YOUR REPOSITORY HERE]
+### What is Unity SDS?
+Quite simply, an SDS (Science Data System) is an orchestrated set of networked compute and storage resources that is adapted to process data through a pipeline. As described by [Hua et al. [2022]](#1):
+> Science Data Systems (SDSes) provide the capability to develop, test, process, and analyze instrument observational data efficiently, systematically, and at large scales. SDSes ingest the raw satellite instrument observations and process them from low‐level instrument values into higher level observational measurement values that compose the science data products.
+
+The [Unity SDS](https://github.com/unity-sds) is an implementation of an SDS by the Unity project at NASA Jet Propulsion Laboratory.
+
+### What are triggers?
+Trigger events are events that could potentially kick off processing in an SDS. Examples of trigger events are:
+
+1. A raw data file is deposited into a location (e.g. S3 bucket, local directory, etc.).
+1. A scheduled task runs and finds a new raw data file has been published to data repository (e.g. CMR, DAAC).
+
+The different types of trigger events lend themselves to particular trigger implementations. Taking #1 as an example and specifically using the S3 bucket use case, an implementation of that trigger could be to use the native S3 event notification capability to notify the SDS that a new file was deposited in the bucket. For the local directory use case, the trigger implementation could be to use the python watchdog library to monitor a local directory and to notify the SDS when a new file has been deposited there.
+
+Taking #2 as an example, an implementation of that trigger would be a cron job running on a local machine that would start up a script that queries for new data using some remote API call which would then notify the SDS. An "all-in" cloud implementation of this trigger would be to use AWS EventBridge as the cron scheduler and AWS Lambda as the script that does the querying and SDS notification.
+
+These are just a small subset of the different types of trigger events and their respective trigger implementations. The unity-initiator provides examples of some of these trigger implementations. More importantly, however, the unity-initator provides the common interface to which any trigger implementation can notify the SDS of the source triggering event. This common interface is called the initiator topic (SNS topic) and the following snippet of the above architecture diagram shows their interaction:
+
+![triggers](https://github.com/unity-sds/unity-initiator/assets/387300/f7d26a4e-908d-4b0b-913b-4e7704a8a2a1)
+
+Trigger events by themselves don't automatically mean that SDS processing is ready to proceed. That's what evaluators are for.
+
+### What are evaluators?
+
+
+###
 <!-- ☝️ Replace with a more detailed description of your repository, including why it was made and whom its intended for.  ☝️ -->
 
 [INSERT LIST OF IMPORTANT PROJECT / REPO LINKS HERE]
@@ -52,6 +77,7 @@ This guide provides a quick way to get started with our project. Please see our 
 * python 3.9+
 * docker
 * hatch
+* all other dependencies (defined in the [pyproject.toml](pyproject.toml)) will be installed and managed by hatch
 
 <!-- ☝️ Replace with a numbered list of your requirements, including hardware if applicable ☝️ -->
 
@@ -242,4 +268,11 @@ pip install unity-initiator
 
 ## License
 
-`unity-initiator` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`unity-initiator` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.o
+
+## References
+<a id="1">[1]</a>
+Hua, H., Manipon, G. and Shah, S. (2022).
+Scaling Big Earth Science Data Systems Via Cloud Computing.
+In Big Data Analytics in Earth, Atmospheric, and Ocean Sciences (eds T. Huang, T.C. Vance and C. Lynnes).
+https://doi.org/10.1002/9781119467557.ch3
