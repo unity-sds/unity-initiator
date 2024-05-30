@@ -48,20 +48,28 @@ As described by [Hua et al. [2022]](#1):
 
 In an SDS, evaluators are functions (irrespective of how they are deployed and called) that perform adaptation-specific evaluation to determine if the next step in the processing pipeline is ready for execution. 
 
-As an example, the following shows the input-output diagram for the NISAR L-SAR L0B:
+As an example, the following shows the input-output diagram for the NISAR L-SAR L0B PGE (a.k.a. science algorithm):
 
 ![nisar_l0b](https://github.com/unity-sds/unity-initiator/assets/387300/395e73da-adb8-459c-a611-8fa9beb6f77f)
 
 The NISAR L-SAR L0B PGE is only executed when the evaluator function determines that:
 
 1. All input L0A files necessary to cover the L0B granule timespan are present in the SDS
-2. The following ancillary files for the input data timespan exist in the SDS and are of the correct fidelity (forecast vs. near vs. medium vs. precise): LRCLK-UTC, orbit ephemeris, radar pointing, radar config, BFPQ lookup tables, LSAR channel data.
-3. Metadata regarding NISAR-specific observation plan, CTZ (cycle time zero) and other orbit-related fields fields are available from these ancillary files: dCOP, oROST, STUF.
+2. The following ancillary files for the input data timespan exist in the SDS and are of the correct fidelity (forecast vs. near vs. medium vs. precise): LRCLK-UTC, orbit ephemeris, radar pointing, radar config, BFPQ lookup tables, LSAR channel data
+3. Metadata regarding NISAR-specific observation plan, CTZ (cycle time zero) and other orbit-related fields fields are available from these ancillary files: dCOP, oROST, STUF
 
-Reality is that there are a few more things that are checked for during this evaluator run but the gist of the evaluation are the steps above.
+Reality is that there are a few more things that are checked for during this evaluator run but the gist of the evaluation are the steps above. When evaluation is successful, the L0B PGE job is submitted, L0B products are produced, and evaluators for downstream PGEs (e.g. L1) are executed.
 
+As with triggers above, the unity-initiator github repository provides [examples](terraform-unity/evaluators) of evaluators that can be used as templates to adapt for a mission/project and deployed. More importantly, the unity-initiator provides the set of common interaces for which any adaptation-specific evaluator can be called as a result of a trigger event. Currently there are only 2 supported interfaces but this repository is set up to easily add new interfaces:
 
+1. Trigger event information published to an evaluator SNS topic + SQS queue executes an evaluator implemented as an AWS Lambda function (submit_to_sns_topic action)
+2. Trigger event information submitted as DAG run for an evaluator implemented in SPS (submit_dag_by_id action)
 
+The following screenshot shows examples of both of these interfaces:
+
+![evaluators](https://github.com/unity-sds/unity-initiator/assets/387300/b36aae2c-16a7-4b94-8721-020b7b375f25)
+
+It is left to the unity-initiator to perform the routing of triggers to their respective evaluators.
 
 ###
 <!-- ☝️ Replace with a more detailed description of your repository, including why it was made and whom its intended for.  ☝️ -->
