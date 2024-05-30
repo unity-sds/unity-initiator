@@ -189,7 +189,7 @@ This guide provides a quick way to get started with our project. Please see our 
 
 <!-- ☝️ Replace with a numbered list of your requirements, including hardware if applicable ☝️ -->
 
-### Setting Up End-to-end Demo
+### Setting Up the End-to-end Demo
 
 #### Deploying the Initiator
 
@@ -261,6 +261,37 @@ This guide provides a quick way to get started with our project. Please see our 
    ```
    **Take note of the `evaluator_topic_arn` that is output by terraform. It should match the topic ARN in the test_router.yaml file you used during the initiator deployment. If they match then the router Lambda is now able to submit payloads to this evaluator SNS topic.**
    
+#### Deploying an S3 Event Notification Trigger
+1. Change directory to the location of the s3_bucket_notification trigger terraform:
+   ```
+   cd ../../triggers/s3_bucket_notification/
+   ```
+1. You will need an S3 bucket to configure event notification on. Create one or reuse an existing one (could be the same one in the previous steps) and set an environment variable for it:
+   ```
+   export ISL_BUCKET=<some S3 bucket name>
+   ```
+1. Specify an S3 prefix from which S3 event notifications will be emitted when objects are created:
+   ```
+   export ISL_BUCKET_PREFIX=incoming/
+   ```
+1. Export the `initiator_topic_arn` that was output from the initiator terraform deployment:
+   ```
+   export INITIATOR_TOPIC_ARN=<initiator topic ARN>
+   ```
+1. Initialize terraform:
+   ```
+   terraform init
+   ```
+1. Run terraform apply:
+   ```
+   terraform apply \
+     --var isl_bucket=${ISL_BUCKET} \
+     --var isl_bucket_prefix=${ISL_BUCKET_PREFIX} \
+     --var initiator_topic_arn=${INITIATOR_TOPIC_ARN} \
+     -auto-approve
+   ```
+1. Verify that the S3 event notification was correctly hooked up to the initiator by looking at the initiator Lambda's CloudWatch logs for a entry similar to this:
+   ![cloudwatch_logs_s3_testevent](https://github.com/unity-sds/unity-initiator/assets/387300/460a0d0b-ee01-480d-afab-ba70185341fc)
 
 ### Setup Instructions for Development
 
