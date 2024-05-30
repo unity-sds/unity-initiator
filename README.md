@@ -184,7 +184,7 @@ In this case, the router sees that the action is `submit_dag_by_id` and thus mak
 * [FAQ](#frequently-asked-questions-faq)
 * [Contributing Guide](#contributing)
 * [License](#license)
-* [Support](#support)
+* [References](#references)
 
 ## Quick Start
 
