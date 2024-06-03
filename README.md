@@ -76,7 +76,7 @@ The Unity initiator is the set of compute resources that enable the routing of t
 
 ![initiator](https://github.com/unity-sds/unity-initiator/assets/387300/74f7c2cb-8542-4ad8-9212-e720077373c0)
 
-The initiator topic, an SNS topic, is the common interface that all triggers will submit events to. The initiator topic is subscribed to by the initiator SQS queue (complete with dead-letter queue for resiliency) which in turn is subscribed to by the router Lambda function. How the router Lambda routes payloads of the trigger events is described the router configuration YAML. The full YAML schema for the router configuration is located [here](src/unity_initiator/resources/routers_schema.yaml).
+The initiator topic, an SNS topic, is the common interface that all triggers will submit events to. The initiator topic is subscribed to by the initiator SQS queue (complete with dead-letter queue for resiliency) which in turn is subscribed to by the router Lambda function. How the router Lambda routes payloads of the trigger events is defined by the router configuration YAML. The full YAML schema for the router configuration is located [here](src/unity_initiator/resources/routers_schema.yaml).
 
 #### How the router works
 In the context of trigger events where a new file is detected (payload_type=`url`), the router Lambda extracts the URL of the new file, instantiates a router object and attempts to match it up against of set of regular expressions defined in the router configuration file. Let's consider this minimal router configuration YAML file example:
