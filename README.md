@@ -34,7 +34,7 @@ Trigger events are events that could potentially kick off processing in an SDS. 
 
 The different types of trigger events lend themselves to particular trigger implementations. Taking #1 as an example and specifically using the S3 bucket use case, an implementation of that trigger could be to use the native S3 event notification capability to notify the SDS that a new file was deposited in the bucket. For the local directory use case, the trigger implementation could be to use the python [watchdog library](https://pypi.org/project/watchdog/) to monitor a local directory and to notify the SDS when a new file has been deposited there.
 
-Taking #2 as an example, an implementation of that trigger would be a cron job running on a local machine that would start up a script that queries for new data using some remote API call which would then notify the SDS. An "all-in" cloud implementation of this trigger would be to use AWS EventBridge as the cron scheduler and AWS Lambda as the "script" that does the querying and SDS notification.
+Taking #2 as an example, an implementation of that trigger would be a cron job running on a local machine that would start up a script that queries for new data using some remote API call which would then notify the SDS. An "all-in" cloud implementation of this trigger would be to use AWS EventBridge as the cron scheduler and AWS Lambda as the "script" that performs the querying and SDS notification.
 
 These are just an initial subset of the different types of trigger events and their respective trigger implementations. This unity-initiator github repository provides [examples](terraform-unity/triggers) of some of these trigger implementations. More importantly, however, the unity-initator provides the common interface to which any trigger implementation can notify the SDS of a triggering event. This common interface is called the initiator topic (implemented as an SNS topic) and the following screenshot from the above architecture diagram shows their interaction:
 
@@ -56,11 +56,11 @@ The NISAR L-SAR L0B PGE is only executed when the evaluator function determines 
 
 1. All input L0A files necessary to cover the L0B granule timespan are present in the SDS
 2. The following ancillary files for the input data timespan exist in the SDS and are of the correct fidelity (forecast vs. near vs. medium vs. precise): LRCLK-UTC, orbit ephemeris, radar pointing, radar config, BFPQ lookup tables, LSAR channel data
-3. Metadata regarding NISAR-specific observation plan, CTZ (cycle time zero) and other orbit-related fields fields are available from these ancillary files: dCOP, oROST, STUF
+3. Metadata regarding the NISAR-specific observation plan, CTZ (cycle time zero) and other orbit-related fields fields are available from these ancillary files: dCOP, oROST, STUF
 
-Reality is that there are a few more things that are checked for during this evaluator run but the gist of the evaluation are the steps above. When evaluation is successful, the L0B PGE job is submitted, L0B products are produced, and evaluators for downstream PGEs (e.g. L1) are executed.
+When evaluation is successful, the L0B PGE job is submitted, L0B products are produced, and evaluators for downstream PGEs (e.g. L1) are executed.
 
-As with triggers above, the unity-initiator github repository provides [examples](terraform-unity/evaluators) of evaluators that can be used as templates to adapt for a mission/project and deployed. More importantly, the unity-initiator provides the set of common interaces for which any adaptation-specific evaluator can be called as a result of a trigger event. Currently there are only 2 supported interfaces but this repository is set up to easily add new interfaces:
+The unity-initiator github repository provides [examples](terraform-unity/evaluators) of evaluators that can be used as templates to adapt and deploy for a mission or project. More importantly, the unity-initiator provides the set of common interaces for which any adaptation-specific evaluator can be called as a result of a trigger event. Currently there are 2 supported interfaces but this repository is organized and structured to easily extend to new interfaces:
 
 1. Trigger event information published to an evaluator SNS topic + SQS queue executes an evaluator implemented as an AWS Lambda function (submit_to_sns_topic action)
 2. Trigger event information submitted as DAG run for an evaluator implemented in SPS (submit_dag_by_id action)
