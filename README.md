@@ -60,7 +60,7 @@ The NISAR L-SAR L0B PGE is only executed when the evaluator function determines 
 
 When evaluation is successful, the L0B PGE job is submitted, L0B products are produced, and evaluators for downstream PGEs (e.g. L1) are executed.
 
-The unity-initiator github repository provides [examples](terraform-unity/evaluators) of evaluators that can be used as templates to adapt and deploy for a mission or project. More importantly, the unity-initiator provides the set of common interaces for which any adaptation-specific evaluator can be called as a result of a trigger event. Currently there are 2 supported interfaces but this repository is organized and structured to easily extend to new interfaces:
+The unity-initiator github repository provides [examples](terraform-unity/evaluators) of evaluators that can be used as templates to adapt and deploy for a mission or project. More importantly, the unity-initiator provides the set of common interfaces for which any adaptation-specific evaluator can be called as a result of a trigger event. Currently there are 2 supported interfaces but this repository is organized and structured to easily extend to new interfaces:
 
 1. Trigger event information published to an evaluator SNS topic + SQS queue executes an evaluator implemented as an AWS Lambda function (submit_to_sns_topic action)
 2. Trigger event information submitted as DAG run for an evaluator implemented in SPS (submit_dag_by_id action)
