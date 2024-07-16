@@ -20,12 +20,7 @@ variable "code_bucket" {
   type        = string
 }
 
-variable "config_bucket" {
-  description = "The S3 bucket where router configuration files will be stored and accessed"
-  type        = string
-}
-
 variable "router_config" {
-  description = "The local path to the router configuration file to use"
+  description = "The S3 URL to the router configuration file"
   type        = string
 }
