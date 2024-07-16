@@ -3,7 +3,7 @@ resource "null_resource" "build_lambda_package" {
   provisioner "local-exec" {
     command = <<EOF
       set -ex
-      docker run --rm -v ${path.module}/../..:/var/task mlupin/docker-lambda:python3.9-build ./scripts/build_lambda_package.sh
+      docker run --rm -v $(realpath ${path.module}/../..):/var/task mlupin/docker-lambda:python3.9-build ./scripts/build_lambda_package.sh
     EOF
   }
 }
