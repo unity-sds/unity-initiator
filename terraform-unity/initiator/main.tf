@@ -18,7 +18,7 @@ resource "aws_s3_object" "lambda_package" {
 }
 
 resource "aws_lambda_function" "initiator_lambda" {
-  depends_on    = [aws_s3_object.lambda_package]
+  depends_on    = [aws_s3_object.lambda_package, aws_cloudwatch_log_group.initiator_lambda]
   function_name = "${var.project}-${var.venue}-${var.deployment_name}-inititator"
   s3_bucket     = var.code_bucket
   s3_key        = "unity_initiator-${jsondecode(data.local_file.version.content).version}-lambda.zip"
@@ -33,6 +33,12 @@ resource "aws_lambda_function" "initiator_lambda" {
     }
   }
   tags = local.tags
+}
+
+resource "aws_cloudwatch_log_group" "initiator_lambda" {
+  name              = "/aws/lambda/${var.project}-${var.venue}-${var.deployment_name}-inititator"
+  retention_in_days = 14
+  tags              = local.tags
 }
 
 resource "aws_iam_role" "initiator_lambda_iam_role" {
