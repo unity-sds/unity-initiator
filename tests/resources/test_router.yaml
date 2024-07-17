@@ -129,3 +129,18 @@ initiator_config:
                           #airflow_base_api_endpoint: xxx
                           #airflow_username: <ARN to username entry in AWS Secrets Manager>
                           #airflow_password: <ARN to password entry in Secrets Manager>
+
+      - regexes:
+          - '(?<=/)(?P<filename>hello_world\.txt)$'
+        evaluators:
+          - name: eval_hello_world_readiness
+            actions:
+              - name: submit_ogc_process_execution
+                params:
+                  process_id: eval_hello_world_readiness
+                  ogc_processes_base_api_endpoint: ${ogc_processes_base_api_endpoint}
+                  on_success:
+                    actions:
+                      - name: submit_ogc_process_execution
+                        params:
+                          process_id: hello_world
