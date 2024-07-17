@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 
 from .evaluator import Evaluator
 from .utils.conf_utils import YamlConf, YamlConfEncoder
@@ -14,6 +15,15 @@ class Router:
     def __init__(self, config_file):
         self._config_file = config_file
         self._config = YamlConf(self._config_file)
+        self._compile_regexes()
+
+    def _compile_regexes(self):
+        """Compile all regex strings in the configuration."""
+        for url_cfg in (
+            self._config.get("initiator_config").get("payload_type").get("url", [])
+        ):
+            if "regexes" in url_cfg:
+                url_cfg["regexes"] = [re.compile(regex) for regex in url_cfg["regexes"]]
 
     def get_evaluators_by_url(self, url):
         found_match = False

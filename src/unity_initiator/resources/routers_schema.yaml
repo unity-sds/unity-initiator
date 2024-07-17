@@ -25,7 +25,7 @@ initiator_config:
 # Configuration for matching payload (e.g. url) against a set of compiled regular expressions
 # and mapping any matches to a set of evaluators.
 regex_config:
-  regexes: list(compiled_regex(), required=True, min=1)
+  regexes: list(str, required=True, min=1)
   evaluators: list(include("evaluator_config"), required=True, min=1)
 
 # Configuration of actions that submit to evaluators.
