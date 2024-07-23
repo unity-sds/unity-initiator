@@ -46,7 +46,7 @@ Trigger events by themselves don't automatically mean that SDS processing is rea
 As described by [Hua et al. [2022]](#1):
 > A fundamental capability of an SDS is to systematically process science data through a series of data transformations from raw instrument data to geophysical measurements. Data are first made available to the SDS from GDS to be processed to higher level data products. The data transformation steps may utilize ancillary and auxiliary files as well as production rules that stipulate conditions for when each step should be executed.
 
-In an SDS, evaluators are functions (irrespective of how they are deployed and called) that perform adaptation-specific evaluation to determine if the next step in the processing pipeline is ready for execution. 
+In an SDS, evaluators are functions (irrespective of how they are deployed and called) that perform adaptation-specific evaluation to determine if the next step in the processing pipeline is ready for execution.
 
 As an example, the following shows the input-output diagram for the NISAR L-SAR L0B PGE (a.k.a. science algorithm):
 
@@ -113,7 +113,7 @@ and a trigger event payload for a new file that was triggered:
 
 The router will iterate over the set of url configs and attempt to match the URL against its set of regexes. If a match is successful, the router will iterate over the configured evaluators configs and perform the configured action to submit the URL payload to the evaluator interface (either SNS topic or DAG submission). In this case, the router sees that the action is `submit_to_sns_topic` and thus publishes the URL payload (and the regular expression captured groups as `payload_info`) to the SNS topic (`topic_arn`) configured in the action's parameters. In addition to the payload URL and the payload info, the router also includes the `on_success` parameters configured for the action. This will propagate pertinent info to the underlying evaluator code which would be used if evaluation is successful. In this case, if the evaulator successfully evaluates that everything is ready for this input file, it can proceed to submit a DAG run for the `submit_nisar_tlm_ingest` DAG in the underlying SPS.
 
-Let's consider another example but this time the configured action is to submit a DAG run instead of publishing to an evaluator's SNS topic: 
+Let's consider another example but this time the configured action is to submit a DAG run instead of publishing to an evaluator's SNS topic:
 ```
 initiator_config:
   name: minimal config example
@@ -271,7 +271,7 @@ This guide provides a quick way to get started with our project. Please see our 
      -auto-approve
    ```
    **Take note of the `evaluator_topic_arn` that is output by terraform. It should match the topic ARN in the test_router.yaml file you used during the initiator deployment. If they match then the router Lambda is now able to submit payloads to this evaluator SNS topic.**
-   
+
 #### Deploying an S3 Event Notification Trigger
 1. Change directory to the location of the s3_bucket_notification trigger terraform:
    ```
@@ -343,7 +343,7 @@ This guide provides a quick way to get started with our project. Please see our 
 
 #### Tear Down
 1. Simply go back into each of the terraform directories for which `terraform apply` was run and run `terraform destroy`.
-   
+
 ### Setup Instructions for Development
 
 1. Clone repo:
