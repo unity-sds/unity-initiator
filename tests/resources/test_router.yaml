@@ -129,3 +129,28 @@ initiator_config:
                           #airflow_base_api_endpoint: xxx
                           #airflow_username: <ARN to username entry in AWS Secrets Manager>
                           #airflow_password: <ARN to password entry in Secrets Manager>
+
+      # AIRS RetStd example: scheduled task to periodically check for new AIRS granules published to CMR
+      - regexes:
+            - !!python/regexp '/(?P<id>(?P<instrument>AIRS)\.(?P<year>\d{4})\.(?P<month>\d{2})\.(?P<day>\d{2})\.(?P<granule_number>\d{3})\.(?P<level>L.+?)\.(?P<product_type>.+?)\.(?P<major_version>v\d+)\.(?P<minor_version>\d+)\.(?P<release_version>\d+)\.(?P<build_number>\d+)\.(?P<production_timestamp>.+?).hdf)$'
+        evaluators:
+
+          # If the regex matches, the router submits a JSON payload to the eval_airs_ingest SNS topic that contains
+          # the payload and the regex match groupdict() as JSON. The groupdict JSON can further provide fields to evaluate
+          # criteria for go/no-go but should remain lightweight.
+          - name: eval_airs_ingest
+            actions:
+              - name: submit_to_sns_topic
+                params:
+                  # topic_arn is optional to allow specific routing to an SNS topic;
+                  # if this was null, empty or absent, then the assumption is a SNS
+                  # topic in the local AWS account using the evaluator name as the SNS topic
+                  topic_arn: arn:aws:sns:hilo-hawaii-1:123456789012:eval_airs_ingest
+                  on_success:
+                    actions:
+                      - name: submit_dag_by_id
+                        params:
+                          dag_id: submit_airs_ingest
+                          airflow_base_api_endpoint: xxx
+                          airflow_username: <SSM parameter, e.g. /unity/airflow/username> <ARN to username entry in AWS Secrets Manager>
+                          airflow_password: <SSM parameter, e.g. /unity/airflow/password> <ARN to password entry in Secrets Manager>
