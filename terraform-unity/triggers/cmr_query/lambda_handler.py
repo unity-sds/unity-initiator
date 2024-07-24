@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 import boto3
 from cmr import GranuleQuery
+
 from unity_initiator.utils.logger import logger
 
 INITIATOR_TOPIC_ARN = os.environ["INITIATOR_TOPIC_ARN"]
@@ -11,8 +12,8 @@ DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
 
 
 def lambda_handler(event, context):
-    logger.info(f"event: {json.dumps(event, indent=2)}")
-    logger.info(f"context: {context}")
+    logger.info("event: %s", json.dumps(event, indent=2))
+    logger.info("context: %s", context)
 
     # get dynamodb client
     db_client = boto3.client("dynamodb")
@@ -27,7 +28,7 @@ def lambda_handler(event, context):
             AttributeDefinitions=[{"AttributeName": "title", "AttributeType": "S"}],
             ProvisionedThroughput={"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
         )
-        logger.info(f"Created table {DYNAMODB_TABLE_NAME}.")
+        logger.info("Created table %s.", DYNAMODB_TABLE_NAME)
     table = boto3.resource("dynamodb").Table(DYNAMODB_TABLE_NAME)
 
     # check required params
@@ -41,14 +42,14 @@ def lambda_handler(event, context):
     # determine start and end timerange
     end_time = datetime.utcnow()
     start_time = end_time - timedelta(seconds=event["seconds_back"])
-    logger.info(f"start_time: {start_time}")
-    logger.info(f"end_time: {end_time}")
+    logger.info("start_time: %s", start_time)
+    logger.info("end_time: %s", end_time)
 
     # query CMR
     api = GranuleQuery().provider(event["provider_id"]).concept_id(event["concept_id"])
     api.temporal(start_time.isoformat("T"), end_time.isoformat("T"))
     hits_count = api.hits()
-    logger.info(f"total hits: {hits_count}")
+    logger.info("total hits: %s", hits_count)
 
     # loop over granules and collect ones that haven't been submitted to the
     # initiator yet
@@ -60,7 +61,7 @@ def lambda_handler(event, context):
             is not None
         ):
             logger.info(
-                f"Skipping granule {granule['title']}. Already exists in table."
+                "Skipping granule %s. Already exists in table.", granule["title"]
             )
             continue
         if len(granule["links"]) == 0:
@@ -77,7 +78,7 @@ def lambda_handler(event, context):
             raise RuntimeError(
                 f"No data found: {json.dumps(granule, indent=2, sort_keys=True)}"
             )
-        logger.info(f"url: {urls[0]['href']}")
+        logger.info("url: %s", urls[0]["href"])
         urls_to_send.append(urls[0]["href"])
         granules_to_save.append(granule)
 
