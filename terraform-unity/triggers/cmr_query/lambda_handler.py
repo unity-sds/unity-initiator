@@ -4,14 +4,15 @@ from datetime import datetime, timedelta
 
 import boto3
 from cmr import GranuleQuery
+from unity_intiator.utils.logger import logger
 
 INITIATOR_TOPIC_ARN = os.environ["INITIATOR_TOPIC_ARN"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
 
 
 def lambda_handler(event, context):
-    print(f"event: {json.dumps(event, indent=2)}")
-    print(f"context: {context}")
+    logger.info(f"event: {json.dumps(event, indent=2)}")
+    logger.info(f"context: {context}")
 
     # get dynamodb client
     db_client = boto3.client("dynamodb")
@@ -25,7 +26,7 @@ def lambda_handler(event, context):
             AttributeDefinitions=[{"AttributeName": "title", "AttributeType": "S"}],
             ProvisionedThroughput={"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
         )
-        print(f"Created table {DYNAMODB_TABLE_NAME}.")
+        logger.info(f"Created table {DYNAMODB_TABLE_NAME}.")
     table = boto3.resource("dynamodb").Table(DYNAMODB_TABLE_NAME)
 
     # check required CMR params
@@ -39,23 +40,25 @@ def lambda_handler(event, context):
     # set start and end times
     end_time = datetime.utcnow()
     start_time = end_time - timedelta(seconds=event["seconds_back"])
-    print(f"start_time: {start_time}")
-    print(f"end_time: {end_time}")
+    logger.info(f"start_time: {start_time}")
+    logger.info(f"end_time: {end_time}")
 
     # query CMR
     api = GranuleQuery().provider(event["provider_id"]).concept_id(event["concept_id"])
     api.temporal(start_time.isoformat("T"), end_time.isoformat("T"))
     hits_count = api.hits()
-    print(f"total hits: {hits_count}")
-    all_res = []
+    logger.info(f"total hits: {hits_count}")
+    urls_to_send = []
+    granules_to_save = []
     for granule in api.get_all():
         if (
             table.get_item(Key={"title": granule["title"]}).get("Item", None)
             is not None
         ):
-            print(f"Skipping granule {granule['title']}. Already exists in table.")
+            logger.info(
+                f"Skipping granule {granule['title']}. Already exists in table."
+            )
             continue
-        table.put_item(Item=granule)
         if len(granule["links"]) == 0:
             raise RuntimeError(
                 f"No links found: {json.dumps(granule, indent=2, sort_keys=True)}"
@@ -70,12 +73,20 @@ def lambda_handler(event, context):
             raise RuntimeError(
                 f"No data found: {json.dumps(granule, indent=2, sort_keys=True)}"
             )
-        print(urls[0])
-        all_res.append(
-            sns_client.publish(
-                TopicArn=INITIATOR_TOPIC_ARN,
-                Subject="Scheduled Task",
-                Message=json.dumps({"payload": urls[0]}),
-            )
-        )
-    return {"success": True, "response": all_res}
+        logger.info(f"url: {urls[0]}")
+        urls_to_send.append(urls[0])
+        granules_to_save.append(granule)
+
+    # publish urls
+    res = sns_client.publish(
+        TopicArn=INITIATOR_TOPIC_ARN,
+        Subject="Scheduled Task",
+        Message=json.dumps({"payload": urls_to_send}),
+    )
+
+    # add granules to table
+    with table.batch_writer() as writer:
+        for granule in granules_to_save:
+            writer.put_item(Item=granule)
+
+    return {"success": True, "response": res}
