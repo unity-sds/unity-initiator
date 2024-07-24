@@ -58,7 +58,7 @@ def lambda_handler_initiator(event, context):
         # For now we use brittle assumptions on the payload structure for each of the supported sources.
 
         # skip S3 test event
-        if message.get("Event", None) == "s3:TestEvent":
+        if isinstance(message, dict) and message.get("Event", None) == "s3:TestEvent":
             logger.info("Skipped s3:TestEvent")
             continue
 
