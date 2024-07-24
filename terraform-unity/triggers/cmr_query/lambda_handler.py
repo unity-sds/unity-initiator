@@ -86,7 +86,7 @@ def lambda_handler(event, context):
     res = sns_client.publish(
         TopicArn=INITIATOR_TOPIC_ARN,
         Subject="Scheduled Task",
-        Message=json.dumps({"payload": urls_to_send}),
+        Message=json.dumps([{"payload": i} for i in urls_to_send]),
     )
 
     # save submitted granules to table so they are not resubmitted in the future
