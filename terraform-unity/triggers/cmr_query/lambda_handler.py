@@ -77,8 +77,8 @@ def lambda_handler(event, context):
             raise RuntimeError(
                 f"No data found: {json.dumps(granule, indent=2, sort_keys=True)}"
             )
-        logger.info(f"url: {urls[0]}")
-        urls_to_send.append(urls[0])
+        logger.info(f"url: {urls[0]['href']}")
+        urls_to_send.append(urls[0]["href"])
         granules_to_save.append(granule)
 
     # publish urls to the initiator
