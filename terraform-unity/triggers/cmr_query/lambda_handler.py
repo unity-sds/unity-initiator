@@ -1,50 +1,81 @@
 import json
 import os
+from datetime import datetime, timedelta
 
 import boto3
 from cmr import GranuleQuery
 
 INITIATOR_TOPIC_ARN = os.environ["INITIATOR_TOPIC_ARN"]
+DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
 
 
 def lambda_handler(event, context):
     print(f"event: {json.dumps(event, indent=2)}")
     print(f"context: {context}")
 
-    # implement your adaptation-specific trigger code here and submit payloads
-    # to the SNS topic as either a list of payloads or a single payload. Below
-    # is an example of a single payload.
-    # Finally return True if it successful. False otherwise.
+    # get dynamodb client
+    db_client = boto3.client("dynamodb")
+    sns_client = boto3.client("sns")
 
-    api = GranuleQuery().provider("GES_DISC").concept_id("C1701805619-GES_DISC")
-    api.temporal("2024-07-17T00:00:00Z", "2024-07-17T23:59:59Z")
+    # get table creating it if necessary
+    if DYNAMODB_TABLE_NAME not in db_client.list_tables()["TableNames"]:
+        db_client.create_table(
+            TableName=DYNAMODB_TABLE_NAME,
+            KeySchema=[{"AttributeName": "title", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "title", "AttributeType": "S"}],
+            ProvisionedThroughput={"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
+        )
+        print(f"Created table {DYNAMODB_TABLE_NAME}.")
+    table = boto3.resource("dynamodb").Table(DYNAMODB_TABLE_NAME)
+
+    # check required CMR params
+    if event.get("provider_id", None) is None:
+        raise RuntimeError("Failed to find provider_id parameter.")
+    if event.get("concept_id", None) is None:
+        raise RuntimeError("Failed to find concept_id parameter.")
+    if event.get("seconds_back", None) is None:
+        raise RuntimeError("Failed to find seconds_back parameter.")
+
+    # set start and end times
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(seconds=event["seconds_back"])
+    print(f"start_time: {start_time}")
+    print(f"end_time: {end_time}")
+
+    # query CMR
+    api = GranuleQuery().provider(event["provider_id"]).concept_id(event["concept_id"])
+    api.temporal(start_time.isoformat("T"), end_time.isoformat("T"))
     hits_count = api.hits()
     print(f"total hits: {hits_count}")
+    all_res = []
     for granule in api.get_all():
-        links = granule["links"]
-        if len(links) == 0:
+        if (
+            table.get_item(Key={"title": granule["title"]}).get("Item", None)
+            is not None
+        ):
+            print(f"Skipping granule {granule['title']}. Already exists in table.")
+            continue
+        table.put_item(Item=granule)
+        if len(granule["links"]) == 0:
             raise RuntimeError(
                 f"No links found: {json.dumps(granule, indent=2, sort_keys=True)}"
             )
-        url = None
-        for link in links:
-            if link["rel"] == "http://esipfed.org/ns/fedsearch/1.1/data#":
-                url = link["href"]
-                break
-        if url is None:
+        urls = list(
+            filter(
+                lambda x: x["rel"] == "http://esipfed.org/ns/fedsearch/1.1/data#",
+                granule["links"],
+            )
+        )
+        if len(urls) == 0:
             raise RuntimeError(
                 f"No data found: {json.dumps(granule, indent=2, sort_keys=True)}"
             )
-        print(url)
-
-    client = boto3.client("sns")
-    res = client.publish(
-        TopicArn=INITIATOR_TOPIC_ARN,
-        Subject="Scheduled Task",
-        Message=json.dumps(
-            {
-                "payload": "s3://bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc25"
-            }
-        ),
-    )
-    return {"success": True, "response": res}
+        print(urls[0])
+        all_res.append(
+            sns_client.publish(
+                TopicArn=INITIATOR_TOPIC_ARN,
+                Subject="Scheduled Task",
+                Message=json.dumps({"payload": urls[0]}),
+            )
+        )
+    return {"success": True, "response": all_res}

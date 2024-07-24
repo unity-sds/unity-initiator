@@ -17,6 +17,62 @@ resource "aws_s3_object" "lambda_package" {
   tags       = local.tags
 }
 
+resource "aws_dynamodb_table" "cmr_table" {
+  name           = "${var.project}-${var.venue}-${var.deployment_name}-cmr_table"
+  read_capacity  = 5
+  write_capacity = 5
+  hash_key       = "title"
+
+  attribute {
+    name = "title"
+    type = "S"
+  }
+
+  server_side_encryption {
+    enabled = true
+  }
+}
+
+resource "aws_iam_policy" "dynamodb_crud_policy" {
+  name = "dynamodb_crud_policy"
+
+  policy = <<EOT
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:PutItem",
+        "dynamodb:Scan",
+        "dynamodb:Query",
+        "dynamodb:UpdateItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:BatchGetItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:ListTables"
+      ],
+      "Resource": [
+        "${aws_dynamodb_table.cmr_table.arn}",
+        "${aws_dynamodb_table.cmr_table.arn}/index/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:ListTables"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/*"
+      ]
+    }
+  ]
+}
+EOT
+}
+
 resource "aws_iam_role" "cmr_query_lambda_iam_role" {
   name = "${var.project}-${var.venue}-${var.deployment_name}-cmr_query_lambda_iam_role"
 
@@ -46,9 +102,14 @@ resource "aws_iam_role_policy_attachment" "lambda_base_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_dynamodb_policy_attachment" {
+  role       = aws_iam_role.cmr_query_lambda_iam_role.name
+  policy_arn = aws_iam_policy.dynamodb_crud_policy.arn
+}
+
 resource "aws_lambda_function" "cmr_query_lambda" {
-  depends_on    = [aws_s3_object.lambda_package]
-  function_name = "${var.project}-${var.venue}-${var.deployment_name}-cmr_query"
+  depends_on    = [aws_s3_object.lambda_package, aws_cloudwatch_log_group.cmr_query_lambda_log_group]
+  function_name = local.function_name
   s3_bucket     = var.code_bucket
   s3_key        = "cmr_query-${jsondecode(data.local_file.version.content).version}-lambda.zip"
   handler       = "lambda_handler.lambda_handler"
@@ -59,9 +120,15 @@ resource "aws_lambda_function" "cmr_query_lambda" {
   environment {
     variables = {
       INITIATOR_TOPIC_ARN = var.initiator_topic_arn
+      DYNAMODB_TABLE_NAME = aws_dynamodb_table.cmr_table.name
     }
   }
   tags = local.tags
+}
+
+resource "aws_cloudwatch_log_group" "cmr_query_lambda_log_group" {
+  name              = "/aws/lambda/${local.function_name}"
+  retention_in_days = 14
 }
 
 resource "aws_iam_role" "scheduler" {
@@ -106,12 +173,19 @@ resource "aws_iam_role_policy_attachment" "scheduler" {
 
 resource "aws_scheduler_schedule" "run_cmr_query" {
   name                = "${var.project}-${var.venue}-${var.deployment_name}-run_cmr_query"
-  schedule_expression = "rate(1 minute)"
+  schedule_expression = var.schedule_expression
   flexible_time_window {
     mode = "OFF"
   }
   target {
     arn      = aws_lambda_function.cmr_query_lambda.arn
     role_arn = aws_iam_role.scheduler.arn
+    input    = <<EOF
+{
+  "provider_id": "${var.provider_id}",
+  "concept_id": "${var.concept_id}",
+  "seconds_back": ${var.seconds_back}
+}
+EOF
   }
 }
