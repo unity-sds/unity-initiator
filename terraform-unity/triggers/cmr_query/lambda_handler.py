@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import boto3
 from cmr import GranuleQuery
-from unity_intiator.utils.logger import logger
+from unity_initiator.utils.logger import logger
 
 INITIATOR_TOPIC_ARN = os.environ["INITIATOR_TOPIC_ARN"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
