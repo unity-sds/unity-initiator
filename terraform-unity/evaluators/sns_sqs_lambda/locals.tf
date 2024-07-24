@@ -1,4 +1,5 @@
 locals {
+  function_name = "${var.project}-${var.venue}-${var.evaluator_name}-evaluator"
   tags = {
     Venue       = "dev"
     ServiceArea = "cs"
