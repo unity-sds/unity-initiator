@@ -18,7 +18,8 @@ def lambda_handler(event, context):
     db_client = boto3.client("dynamodb")
     sns_client = boto3.client("sns")
 
-    # get table creating it if necessary
+    # create table (or get if already exists) that will be used to track
+    # granules that have already been sumbmitted to the initiator
     if DYNAMODB_TABLE_NAME not in db_client.list_tables()["TableNames"]:
         db_client.create_table(
             TableName=DYNAMODB_TABLE_NAME,
@@ -29,7 +30,7 @@ def lambda_handler(event, context):
         logger.info(f"Created table {DYNAMODB_TABLE_NAME}.")
     table = boto3.resource("dynamodb").Table(DYNAMODB_TABLE_NAME)
 
-    # check required CMR params
+    # check required params
     if event.get("provider_id", None) is None:
         raise RuntimeError("Failed to find provider_id parameter.")
     if event.get("concept_id", None) is None:
@@ -37,7 +38,7 @@ def lambda_handler(event, context):
     if event.get("seconds_back", None) is None:
         raise RuntimeError("Failed to find seconds_back parameter.")
 
-    # set start and end times
+    # determine start and end timerange
     end_time = datetime.utcnow()
     start_time = end_time - timedelta(seconds=event["seconds_back"])
     logger.info(f"start_time: {start_time}")
@@ -48,6 +49,9 @@ def lambda_handler(event, context):
     api.temporal(start_time.isoformat("T"), end_time.isoformat("T"))
     hits_count = api.hits()
     logger.info(f"total hits: {hits_count}")
+
+    # loop over granules and collect ones that haven't been submitted to the
+    # initiator yet
     urls_to_send = []
     granules_to_save = []
     for granule in api.get_all():
@@ -77,14 +81,14 @@ def lambda_handler(event, context):
         urls_to_send.append(urls[0])
         granules_to_save.append(granule)
 
-    # publish urls
+    # publish urls to the initiator
     res = sns_client.publish(
         TopicArn=INITIATOR_TOPIC_ARN,
         Subject="Scheduled Task",
         Message=json.dumps({"payload": urls_to_send}),
     )
 
-    # add granules to table
+    # save submitted granules to table so they are not resubmitted in the future
     with table.batch_writer() as writer:
         for granule in granules_to_save:
             writer.put_item(Item=granule)
