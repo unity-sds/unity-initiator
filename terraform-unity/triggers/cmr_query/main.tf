@@ -18,7 +18,7 @@ resource "aws_s3_object" "lambda_package" {
 }
 
 resource "aws_dynamodb_table" "cmr_table" {
-  name           = "${var.project}-${var.venue}-${var.deployment_name}-cmr_table"
+  name           = "${local.function_name}_table"
   read_capacity  = 5
   write_capacity = 5
   hash_key       = "title"
@@ -74,7 +74,7 @@ EOT
 }
 
 resource "aws_iam_role" "cmr_query_lambda_iam_role" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-cmr_query_lambda_iam_role"
+  name = "${local.function_name}_lambda_iam_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -132,7 +132,7 @@ resource "aws_cloudwatch_log_group" "cmr_query_lambda_log_group" {
 }
 
 resource "aws_iam_role" "scheduler" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-cron-scheduler-role"
+  name = "${local.function_name}-cron-scheduler-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -150,7 +150,7 @@ resource "aws_iam_role" "scheduler" {
 }
 
 resource "aws_iam_policy" "scheduler" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-cron-scheduler-policy"
+  name = "${local.function_name}-cron-scheduler-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -172,7 +172,7 @@ resource "aws_iam_role_policy_attachment" "scheduler" {
 }
 
 resource "aws_scheduler_schedule" "run_cmr_query" {
-  name                = "${var.project}-${var.venue}-${var.deployment_name}-run_cmr_query"
+  name                = "${local.function_name}-schedule"
   schedule_expression = var.schedule_expression
   flexible_time_window {
     mode = "OFF"
