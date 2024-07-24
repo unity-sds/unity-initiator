@@ -11,6 +11,22 @@ INITIATOR_TOPIC_ARN = os.environ["INITIATOR_TOPIC_ARN"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
 
 
+def submit_urls_and_bookkeep(sns_client, urls_to_send, table, granules_to_save):
+    # batch submit urls to initiator topic
+    res = sns_client.publish(
+        TopicArn=INITIATOR_TOPIC_ARN,
+        Subject="Scheduled Task",
+        Message=json.dumps([{"payload": i} for i in urls_to_send]),
+    )
+
+    # batch save submitted granules to table so they are not resubmitted in the future
+    with table.batch_writer() as writer:
+        for granule in granules_to_save:
+            writer.put_item(Item=granule)
+
+    return res
+
+
 def lambda_handler(event, context):
     logger.info("event: %s", json.dumps(event, indent=2))
     logger.info("context: %s", context)
@@ -83,15 +99,10 @@ def lambda_handler(event, context):
         granules_to_save.append(granule)
 
     # publish urls to the initiator
-    res = sns_client.publish(
-        TopicArn=INITIATOR_TOPIC_ARN,
-        Subject="Scheduled Task",
-        Message=json.dumps([{"payload": i} for i in urls_to_send]),
-    )
-
-    # save submitted granules to table so they are not resubmitted in the future
-    with table.batch_writer() as writer:
-        for granule in granules_to_save:
-            writer.put_item(Item=granule)
+    res = "No new granules were found."
+    if len(urls_to_send) > 0:
+        res = submit_urls_and_bookkeep(
+            sns_client, urls_to_send, table, granules_to_save
+        )
 
     return {"success": True, "response": res}
