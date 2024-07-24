@@ -423,7 +423,7 @@ This guide provides a quick way to get started with our project. Please see our 
 
 #### Verify End-to-End Functionality (part 3)
 1. The deployed EventBridge scheduler runs the trigger Lambda function with schedule expression of `rate(1 minute)`. After a minute, verify that the `eval_airs_ingest` evaluator Lambda function was called successfully for each of those scheduled invocations by looking at its CloudWatch logs for entries similar to this:
-
+   ![eval_log_3](https://github.com/user-attachments/assets/54b26349-91b2-4958-9082-47613da6c675)
 
 #### Tear Down
 1. Simply go back into each of the terraform directories for which `terraform apply` was run and run `terraform destroy`.
