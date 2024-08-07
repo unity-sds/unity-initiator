@@ -1,4 +1,5 @@
 locals {
+  function_name = "${var.project}-${var.venue}-${var.deployment_name}-scheduled_task"
   tags = {
     Venue       = "dev"
     ServiceArea = "cs"

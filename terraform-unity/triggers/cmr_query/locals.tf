@@ -1,12 +1,12 @@
 locals {
-  function_name = "${var.project}-${var.venue}-${var.evaluator_name}-evaluator"
+  function_name = "${var.project}-${var.venue}-${var.deployment_name}-cmr_query"
   tags = {
     Venue       = "dev"
     ServiceArea = "cs"
-    Capability  = "evaluator"
+    Capability  = "trigger"
     CapVersion  = "0.0.1"
     Component   = "U-OD"
-    Name        = "${var.project}-${var.venue}-cs-evaluator-od"
+    Name        = "${var.project}-${var.venue}-cs-trigger-od"
     Proj        = var.project
     CreatedBy   = "cs"
     Env         = "dev"
