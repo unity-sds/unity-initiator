@@ -1,8 +1,3 @@
-variable "deployment_name" {
-  description = "The deployment name"
-  type        = string
-}
-
 variable "project" {
   description = "The unity project its installed into"
   type        = string

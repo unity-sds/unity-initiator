@@ -177,28 +177,28 @@ In this case, the router sees that the action is `submit_dag_by_id` and thus mak
 
 ## Contents
 
-- [Features](#features)
-- [Contents](#contents)
-- [Quick Start](#quick-start)
-  - [Requirements](#requirements)
-  - [Setting Up the End-to-End Demo](#setting-up-the-end-to-end-demo)
-    - [Deploying the Initiator](#deploying-the-initiator)
-    - [Deploying an Example Evaluator (SNS topic-\>SQS queue-\>Lambda)](#deploying-an-example-evaluator-sns-topic-sqs-queue-lambda)
-    - [Deploying an S3 Event Notification Trigger](#deploying-an-s3-event-notification-trigger)
-    - [Verify End-to-End Functionality (part 1)](#verify-end-to-end-functionality-part-1)
-    - [Deploying an EventBridge Scheduler Trigger](#deploying-an-eventbridge-scheduler-trigger)
-    - [Verify End-to-End Functionality (part 2)](#verify-end-to-end-functionality-part-2)
-    - [Deploying an EventBridge Scheduler Trigger for Periodic CMR Queries](#deploying-an-eventbridge-scheduler-trigger-for-periodic-cmr-queries)
-    - [Verify End-to-End Functionality (part 3)](#verify-end-to-end-functionality-part-3)
-    - [Tear Down](#tear-down)
-  - [Setup Instructions for Development](#setup-instructions-for-development)
-  - [Build Instructions](#build-instructions)
-  - [Test Instructions](#test-instructions)
-- [Changelog](#changelog)
-- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
-- [Contributing](#contributing)
-- [License](#license)
-- [References](#references)
+* [Features](#features)
+* [Contents](#contents)
+* [Quick Start](#quick-start)
+  * [Requirements](#requirements)
+  * [Setting Up the End-to-End Demo](#setting-up-the-end-to-end-demo)
+    * [Deploying the Initiator](#deploying-the-initiator)
+    * [Deploying an Example Evaluator (SNS topic-\>SQS queue-\>Lambda)](#deploying-an-example-evaluator-sns-topic-sqs-queue-lambda)
+    * [Deploying an S3 Event Notification Trigger](#deploying-an-s3-event-notification-trigger)
+    * [Verify End-to-End Functionality (part 1)](#verify-end-to-end-functionality-part-1)
+    * [Deploying an EventBridge Scheduler Trigger](#deploying-an-eventbridge-scheduler-trigger)
+    * [Verify End-to-End Functionality (part 2)](#verify-end-to-end-functionality-part-2)
+    * [Deploying an EventBridge Scheduler Trigger for Periodic CMR Queries](#deploying-an-eventbridge-scheduler-trigger-for-periodic-cmr-queries)
+    * [Verify End-to-End Functionality (part 3)](#verify-end-to-end-functionality-part-3)
+    * [Tear Down](#tear-down)
+  * [Setup Instructions for Development](#setup-instructions-for-development)
+  * [Build Instructions](#build-instructions)
+  * [Test Instructions](#test-instructions)
+* [Changelog](#changelog)
+* [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
+* [Contributing](#contributing)
+* [License](#license)
+* [References](#references)
 
 ## Quick Start
 
@@ -253,10 +253,10 @@ This guide provides a quick way to get started with our project. Please see our 
    export CONFIG_BUCKET=<some S3 bucket name>
    ```
 
-1. Set a deployment name:
+1. Set a project name:
 
    ```
-   export DEPLOYMENT_NAME=gmanipon-test
+   export PROJECT=gmanipon-test
    ```
 
 1. Initialize terraform:
@@ -269,7 +269,7 @@ This guide provides a quick way to get started with our project. Please see our 
 
    ```
    terraform apply \
-     --var deployment_name=${DEPLOYMENT_NAME} \
+     --var project=${PROJECT} \
      --var code_bucket=${CODE_BUCKET} \
      --var config_bucket=${CONFIG_BUCKET} \
      --var router_config=test_router.yaml \
@@ -400,11 +400,11 @@ This guide provides a quick way to get started with our project. Please see our 
    terraform init
    ```
 
-1. Run terraform apply. Note the DEPLOYMENT_NAME and INITIATOR_TOPIC_ARN environment variables should have been set in the previous steps. If not set them again:
+1. Run terraform apply. Note the PROJECT and INITIATOR_TOPIC_ARN environment variables should have been set in the previous steps. If not set them again:
 
    ```
    terraform apply \
-     --var deployment_name=${DEPLOYMENT_NAME} \
+     --var project=${PROJECT} \
      --var initiator_topic_arn=${INITIATOR_TOPIC_ARN} \
      -auto-approve
    ```
@@ -452,11 +452,11 @@ This guide provides a quick way to get started with our project. Please see our 
    terraform init
    ```
 
-1. Run terraform apply. Note the DEPLOYMENT_NAME, CODE_BUCKET and INITIATOR_TOPIC_ARN environment variables should have been set in the previous steps. If not set them again:
+1. Run terraform apply. Note the PROJECT, CODE_BUCKET and INITIATOR_TOPIC_ARN environment variables should have been set in the previous steps. If not set them again:
 
    ```
    terraform apply \
-     --var deployment_name=${DEPLOYMENT_NAME} \
+     --var project=${PROJECT} \
      --var code_bucket=${CODE_BUCKET} \
      --var initiator_topic_arn=${INITIATOR_TOPIC_ARN} \
      --var provider_id=${PROVIDER_ID} \

@@ -50,7 +50,6 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_code_bucket"></a> [code\_bucket](#input\_code\_bucket) | The S3 bucket where lambda zip files will be stored and accessed | `string` | n/a | yes |
-| <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | The deployment name | `string` | n/a | yes |
 | <a name="input_project"></a> [project](#input\_project) | The unity project its installed into | `string` | `"uod"` | no |
 | <a name="input_router_config"></a> [router\_config](#input\_router\_config) | The S3 URL to the router configuration file | `string` | n/a | yes |
 | <a name="input_venue"></a> [venue](#input\_venue) | The unity venue its installed into | `string` | `"dev"` | no |
