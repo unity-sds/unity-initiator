@@ -8,7 +8,7 @@ resource "aws_lambda_function" "evaluator_lambda" {
     ]
   }
 
-  function_name    = "${var.project}-${var.venue}-${var.evaluator_name}-evaluator"
+  function_name    = local.function_name
   role             = aws_iam_role.evaluator_lambda_iam_role.arn
   handler          = "lambda_function.lambda_handler"
   runtime          = "python3.11"
@@ -18,8 +18,13 @@ resource "aws_lambda_function" "evaluator_lambda" {
   tags             = local.tags
 }
 
+resource "aws_cloudwatch_log_group" "evaluator_lambda_log_group" {
+  name              = "/aws/lambda/${local.function_name}"
+  retention_in_days = 14
+}
+
 resource "aws_iam_role" "evaluator_lambda_iam_role" {
-  name = "${var.project}-${var.venue}-${var.evaluator_name}-evaluator_lambda_iam_role"
+  name = "${local.function_name}_lambda_iam_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -38,7 +43,7 @@ resource "aws_iam_role" "evaluator_lambda_iam_role" {
 }
 
 resource "aws_iam_policy" "evaluator_lambda_policy" {
-  name        = "${var.project}-${var.venue}-${var.evaluator_name}-evaluator_lambda_policy"
+  name        = "${local.function_name}_lambda_policy"
   description = "A policy for the evaluator lambda function to access S3 and SQS"
 
   policy = jsonencode({
@@ -89,7 +94,7 @@ resource "aws_ssm_parameter" "evaluator_lambda_function_name" {
 
 
 resource "aws_sqs_queue" "evaluator_dead_letter_queue" {
-  name                       = "${var.project}-${var.venue}-${var.evaluator_name}-evaluator_dead_letter_queue"
+  name                       = "${local.function_name}_dead_letter_queue"
   delay_seconds              = 0
   max_message_size           = 2048
   message_retention_seconds  = 1209600
@@ -99,7 +104,7 @@ resource "aws_sqs_queue" "evaluator_dead_letter_queue" {
 }
 
 resource "aws_sqs_queue" "evaluator_queue" {
-  name                       = "${var.project}-${var.venue}-${var.evaluator_name}-evaluator_queue"
+  name                       = "${local.function_name}_queue"
   delay_seconds              = 0
   max_message_size           = 2048
   message_retention_seconds  = 1209600
@@ -113,7 +118,7 @@ resource "aws_sqs_queue" "evaluator_queue" {
 }
 
 resource "aws_sns_topic" "evaluator_topic" {
-  name = "${var.project}-${var.venue}-${var.evaluator_name}-evaluator_topic"
+  name = "${local.function_name}_topic"
 }
 
 resource "aws_sns_topic_policy" "evaluator_topic_policy" {

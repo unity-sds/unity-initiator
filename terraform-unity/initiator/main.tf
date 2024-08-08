@@ -118,7 +118,7 @@ resource "aws_ssm_parameter" "initiator_lambda_function_name" {
 
 
 resource "aws_sqs_queue" "initiator_dead_letter_queue" {
-  name                       = "${var.project}-${var.venue}-${var.deployment_name}-inititator_dead_letter_queue"
+  name                       = "${local.function_name}_dead_letter_queue"
   delay_seconds              = 0
   max_message_size           = 2048
   message_retention_seconds  = 1209600
@@ -127,7 +127,7 @@ resource "aws_sqs_queue" "initiator_dead_letter_queue" {
 }
 
 resource "aws_sqs_queue" "initiator_queue" {
-  name                       = "${var.project}-${var.venue}-${var.deployment_name}-inititator_queue"
+  name                       = "${local.function_name}_queue"
   delay_seconds              = 0
   max_message_size           = 2048
   message_retention_seconds  = 1209600
@@ -141,7 +141,7 @@ resource "aws_sqs_queue" "initiator_queue" {
 }
 
 resource "aws_sns_topic" "initiator_topic" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-inititator_topic"
+  name = "${local.function_name}_topic"
   tags = local.tags
 }
 

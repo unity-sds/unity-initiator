@@ -1,5 +1,5 @@
 resource "aws_iam_role" "scheduled_task_lambda_iam_role" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-scheduled_task_lambda_iam_role"
+  name = "${local.function_name}_lambda_iam_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -30,7 +30,7 @@ resource "aws_iam_role_policy_attachment" "lambda_base_policy_attachment" {
 resource "aws_lambda_function" "scheduled_task_lambda" {
   filename         = data.archive_file.lambda_zip_inline.output_path
   source_code_hash = data.archive_file.lambda_zip_inline.output_base64sha256
-  function_name    = "${var.project}-${var.venue}-${var.deployment_name}-scheduled_task"
+  function_name    = local.function_name
   handler          = "lambda_function.lambda_handler"
   runtime          = "python3.11"
   role             = aws_iam_role.scheduled_task_lambda_iam_role.arn
@@ -42,6 +42,11 @@ resource "aws_lambda_function" "scheduled_task_lambda" {
     }
   }
   tags = local.tags
+}
+
+resource "aws_cloudwatch_log_group" "scheduled_task_lambda_log_group" {
+  name              = "/aws/lambda/${local.function_name}"
+  retention_in_days = 14
 }
 
 resource "aws_iam_role" "scheduler" {

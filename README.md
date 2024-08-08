@@ -50,6 +50,7 @@ As described by [Hua et al. [2022]](#1):
 > A fundamental capability of an SDS is to systematically process science data through a series of data transformations from raw instrument data to geophysical measurements. Data are first made available to the SDS from GDS to be processed to higher level data products. The data transformation steps may utilize ancillary and auxiliary files as well as production rules that stipulate conditions for when each step should be executed.
 
 In an SDS, evaluators are functions (irrespective of how they are deployed and called) that perform adaptation-specific evaluation to determine if the next step in the processing pipeline is ready for execution.
+In an SDS, evaluators are functions (irrespective of how they are deployed and called) that perform adaptation-specific evaluation to determine if the next step in the processing pipeline is ready for execution.
 
 As an example, the following shows the input-output diagram for the NISAR L-SAR L0B PGE (a.k.a. science algorithm):
 
@@ -176,26 +177,28 @@ In this case, the router sees that the action is `submit_dag_by_id` and thus mak
 
 ## Contents
 
-* [Features](#features)
-* [Contents](#contents)
-* [Quick Start](#quick-start)
-  * [Requirements](#requirements)
-  * [Setting Up the End-to-End Demo](#setting-up-the-end-to-end-demo)
-    * [Deploying the Initiator](#deploying-the-initiator)
-    * [Deploying an Example Evaluator (SNS topic-\>SQS queue-\>Lambda)](#deploying-an-example-evaluator-sns-topic-sqs-queue-lambda)
-    * [Deploying an S3 Event Notification Trigger](#deploying-an-s3-event-notification-trigger)
-    * [Verify End-to-End Functionality (part 1)](#verify-end-to-end-functionality-part-1)
-    * [Deploying an EventBridge Scheduler Trigger](#deploying-an-eventbridge-scheduler-trigger)
-    * [Verify End-to-End Functionality (part 2)](#verify-end-to-end-functionality-part-2)
-    * [Tear Down](#tear-down)
-  * [Setup Instructions for Development](#setup-instructions-for-development)
-  * [Build Instructions](#build-instructions)
-  * [Test Instructions](#test-instructions)
-* [Changelog](#changelog)
-* [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
-* [Contributing](#contributing)
-* [License](#license)
-* [References](#references)
+- [Features](#features)
+- [Contents](#contents)
+- [Quick Start](#quick-start)
+  - [Requirements](#requirements)
+  - [Setting Up the End-to-End Demo](#setting-up-the-end-to-end-demo)
+    - [Deploying the Initiator](#deploying-the-initiator)
+    - [Deploying an Example Evaluator (SNS topic-\>SQS queue-\>Lambda)](#deploying-an-example-evaluator-sns-topic-sqs-queue-lambda)
+    - [Deploying an S3 Event Notification Trigger](#deploying-an-s3-event-notification-trigger)
+    - [Verify End-to-End Functionality (part 1)](#verify-end-to-end-functionality-part-1)
+    - [Deploying an EventBridge Scheduler Trigger](#deploying-an-eventbridge-scheduler-trigger)
+    - [Verify End-to-End Functionality (part 2)](#verify-end-to-end-functionality-part-2)
+    - [Deploying an EventBridge Scheduler Trigger for Periodic CMR Queries](#deploying-an-eventbridge-scheduler-trigger-for-periodic-cmr-queries)
+    - [Verify End-to-End Functionality (part 3)](#verify-end-to-end-functionality-part-3)
+    - [Tear Down](#tear-down)
+  - [Setup Instructions for Development](#setup-instructions-for-development)
+  - [Build Instructions](#build-instructions)
+  - [Test Instructions](#test-instructions)
+- [Changelog](#changelog)
+- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
+- [Contributing](#contributing)
+- [License](#license)
+- [References](#references)
 
 ## Quick Start
 
@@ -235,6 +238,7 @@ This guide provides a quick way to get started with our project. Please see our 
    export AWS_REGION=$(aws configure get region)
    sed -i "s/hilo-hawaii-1/${AWS_REGION}/g" test_router.yaml
    sed -i "s/123456789012:eval_nisar_ingest/${AWS_ACCOUNT_ID}:uod-dev-eval_nisar_ingest-evaluator_topic/g" test_router.yaml
+   sed -i "s/123456789012:eval_airs_ingest/${AWS_ACCOUNT_ID}:uod-dev-eval_airs_ingest-evaluator_topic/g" test_router.yaml
    ```
 
 1. You will need an S3 bucket for terraform to stage the router Lambda zip file during deployment. Create one or reuse an existing one and set an environment variable for it:
@@ -279,7 +283,13 @@ This guide provides a quick way to get started with our project. Please see our 
 1. Change directory to the location of the sns_sqs_lambda evaluator terraform:
 
    ```
-   cd ../evaluators/sns_sqs_lambda/
+   cp -rp sns_sqs_lambda sns_sqs_lambda-nisar_tlm
+   ```
+
+1. Change directory into the NISAR TLM evaluator terraform:
+
+   ```
+   cd sns_sqs_lambda-nisar_tlm/
    ```
 
 1. Set the name of the evaluator to our NISAR example:
@@ -403,6 +413,62 @@ This guide provides a quick way to get started with our project. Please see our 
 
 1. The deployed EventBridge scheduler runs the trigger Lambda function with schedule expression of `rate(1 minute)`. After a minute, verify that the `eval_nisar_ingest` evaluator Lambda function was called successfully for each of those scheduled invocations by looking at its CloudWatch logs for entries similar to this:
    ![eval_log_2](https://github.com/unity-sds/unity-initiator/assets/387300/cae82e10-a736-43b7-8957-790fc29b5fea)
+
+#### Deploying an EventBridge Scheduler Trigger for Periodic CMR Queries
+
+1. Change directory to the location of the s3_bucket_notification trigger terraform:
+
+   ```
+   cd ../cmr_query/
+   ```
+
+1. Note the implementation of the trigger lambda code. It will query CMR for granules for a particular collection within a timeframe, query its dynamodb table if they already exist, and if not, submit them as payload URLs to the initiator SNS topic and save them into the dynamodb table:
+
+   ```
+   cat lambda_handler.py
+   ```
+
+1. Set the CMR provider ID for the AIRS RetStd collection:
+
+   ```
+   export PROVIDER_ID=GES_DISC
+   ```
+
+1. Set the CMR concept ID for the AIRS RetStd collection:
+
+   ```
+   export CONCEPT_ID=C1701805619-GES_DISC
+   ```
+
+1. Set the amount of seconds to look back from the current epoch for granules in the collection. For example, we will set this value to 2 days (172800 seconds) so that when the CMR query lambda kicks off, it will query for all AIRS RetStd granules using a temporal search of `now - 172800 seconds` to `now`:
+
+   ```
+   export SECONDS_BACK=172800
+   ```
+
+1. Initialize terraform:
+
+   ```
+   terraform init
+   ```
+
+1. Run terraform apply. Note the DEPLOYMENT_NAME, CODE_BUCKET and INITIATOR_TOPIC_ARN environment variables should have been set in the previous steps. If not set them again:
+
+   ```
+   terraform apply \
+     --var deployment_name=${DEPLOYMENT_NAME} \
+     --var code_bucket=${CODE_BUCKET} \
+     --var initiator_topic_arn=${INITIATOR_TOPIC_ARN} \
+     --var provider_id=${PROVIDER_ID} \
+     --var concept_id=${CONCEPT_ID} \
+     --var seconds_back=${SECONDS_BACK} \
+     -auto-approve
+   ```
+
+#### Verify End-to-End Functionality (part 3)
+
+1. The deployed EventBridge scheduler runs the trigger CMR query Lambda function with schedule expression of `rate(1 minute)`. After a minute, verify that the `eval_airs_ingest` evaluator Lambda function was called successfully for each of those scheduled invocations by looking at its CloudWatch logs for entries similar to this:
+   ![eval_log_3](https://github.com/user-attachments/assets/54b26349-91b2-4958-9082-47613da6c675)
 
 #### Tear Down
 
