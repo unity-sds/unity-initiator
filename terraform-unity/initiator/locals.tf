@@ -1,5 +1,5 @@
 locals {
-  function_name = "${var.project}-${var.venue}-${var.deployment_name}-inititator"
+  function_name = "${var.project}-${var.venue}-inititator"
   tags = {
     Venue       = "dev"
     ServiceArea = "cs"

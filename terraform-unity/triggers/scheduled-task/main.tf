@@ -50,7 +50,7 @@ resource "aws_cloudwatch_log_group" "scheduled_task_lambda_log_group" {
 }
 
 resource "aws_iam_role" "scheduler" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-cron-scheduler-role"
+  name = "${var.project}-${var.venue}-cron-scheduler-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -68,7 +68,7 @@ resource "aws_iam_role" "scheduler" {
 }
 
 resource "aws_iam_policy" "scheduler" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-cron-scheduler-policy"
+  name = "${var.project}-${var.venue}-cron-scheduler-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -90,7 +90,7 @@ resource "aws_iam_role_policy_attachment" "scheduler" {
 }
 
 resource "aws_scheduler_schedule" "run_scheduled_task" {
-  name                = "${var.project}-${var.venue}-${var.deployment_name}-run_scheduled_task"
+  name                = "${var.project}-${var.venue}-run_scheduled_task"
   schedule_expression = "rate(1 minute)"
   flexible_time_window {
     mode = "OFF"

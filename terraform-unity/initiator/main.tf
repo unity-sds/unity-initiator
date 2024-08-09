@@ -3,7 +3,7 @@ resource "null_resource" "build_lambda_package" {
   provisioner "local-exec" {
     command = <<EOF
       set -ex
-      docker run --rm -v ${path.module}/../..:/var/task mlupin/docker-lambda:python3.9-build ./scripts/build_lambda_package.sh
+      docker run --rm -v $(realpath ${path.module}/../..):/var/task mlupin/docker-lambda:python3.9-build ./scripts/build_lambda_package.sh
     EOF
   }
 }
@@ -17,17 +17,9 @@ resource "aws_s3_object" "lambda_package" {
   tags       = local.tags
 }
 
-resource "aws_s3_object" "router_config" {
-  bucket = var.config_bucket
-  key    = basename(var.router_config)
-  source = var.router_config
-  etag   = filemd5(var.router_config)
-  tags   = local.tags
-}
-
 resource "aws_lambda_function" "initiator_lambda" {
-  depends_on    = [aws_s3_object.lambda_package, aws_s3_object.router_config, aws_cloudwatch_log_group.initiator_lambda_log_group]
-  function_name = local.function_name
+  depends_on    = [aws_s3_object.lambda_package, aws_cloudwatch_log_group.initiator_lambda]
+  function_name = "${var.project}-${var.venue}-inititator"
   s3_bucket     = var.code_bucket
   s3_key        = "unity_initiator-${jsondecode(data.local_file.version.content).version}-lambda.zip"
   handler       = "unity_initiator.cloud.lambda_handler.lambda_handler_initiator"
@@ -37,19 +29,20 @@ resource "aws_lambda_function" "initiator_lambda" {
 
   environment {
     variables = {
-      ROUTER_CFG_URL = "s3://${aws_s3_object.router_config.bucket}/${aws_s3_object.router_config.key}"
+      ROUTER_CFG_URL = var.router_config
     }
   }
   tags = local.tags
 }
 
-resource "aws_cloudwatch_log_group" "initiator_lambda_log_group" {
-  name              = "/aws/lambda/${local.function_name}"
+resource "aws_cloudwatch_log_group" "initiator_lambda" {
+  name              = "/aws/lambda/${var.project}-${var.venue}-inititator"
   retention_in_days = 14
+  tags              = local.tags
 }
 
 resource "aws_iam_role" "initiator_lambda_iam_role" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-initiator_lambda_iam_role"
+  name = "${var.project}-${var.venue}-initiator_lambda_iam_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -68,7 +61,7 @@ resource "aws_iam_role" "initiator_lambda_iam_role" {
 }
 
 resource "aws_iam_policy" "initiator_lambda_policy" {
-  name        = "${var.project}-${var.venue}-${var.deployment_name}-initiator_lambda_policy"
+  name        = "${var.project}-${var.venue}-initiator_lambda_policy"
   description = "A policy for the initiator lambda function to access S3 and SQS"
 
   policy = jsonencode({

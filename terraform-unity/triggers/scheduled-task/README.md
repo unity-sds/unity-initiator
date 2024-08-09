@@ -5,7 +5,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.4.6 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8.2 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | >=2.4.2 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >=5.50.0 |
 | <a name="requirement_local"></a> [local](#requirement\_local) | >=2.5.1 |
@@ -42,7 +42,6 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | The deployment name | `string` | n/a | yes |
 | <a name="input_initiator_topic_arn"></a> [initiator\_topic\_arn](#input\_initiator\_topic\_arn) | The ARN of the initiator SNS topic to publish S3 events to | `string` | n/a | yes |
 | <a name="input_project"></a> [project](#input\_project) | The unity project its installed into | `string` | `"uod"` | no |
 | <a name="input_venue"></a> [venue](#input\_venue) | The unity venue its installed into | `string` | `"dev"` | no |
