@@ -53,13 +53,13 @@ resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
 
 resource "aws_lambda_function" "scheduled_task_lambda" {
   depends_on    = [aws_s3_object.lambda_package, aws_cloudwatch_log_group.scheduled_task_lambda_log_group]
-  function_name    = local.function_name
-  s3_bucket        = var.code_bucket
-  s3_key           = "scheduled_task-${jsondecode(data.local_file.version.content).version}-lambda.zip"
-  handler          = "lambda_handler.lambda_handler"
-  runtime          = "python3.11"
-  role             = aws_iam_role.scheduled_task_lambda_iam_role.arn
-  timeout          = 900
+  function_name = local.function_name
+  s3_bucket     = var.code_bucket
+  s3_key        = "scheduled_task-${jsondecode(data.local_file.version.content).version}-lambda.zip"
+  handler       = "lambda_handler.lambda_handler"
+  runtime       = "python3.11"
+  role          = aws_iam_role.scheduled_task_lambda_iam_role.arn
+  timeout       = 900
 
   environment {
     variables = {

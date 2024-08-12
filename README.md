@@ -280,16 +280,16 @@ This guide provides a quick way to get started with our project. Please see our 
 
 #### Deploying an Example Evaluator (SNS topic->SQS queue->Lambda)
 
-1. Change directory to the location of the sns_sqs_lambda evaluator terraform:
+1. Change directory to the location of the sns-sqs-lambda evaluator terraform:
 
    ```
-   cp -rp sns_sqs_lambda sns_sqs_lambda-nisar_tlm
+   cp -rp sns-sqs-lambda sns-sqs-lambda-nisar-tlm
    ```
 
 1. Change directory into the NISAR TLM evaluator terraform:
 
    ```
-   cd sns_sqs_lambda-nisar_tlm/
+   cd sns-sqs-lambda-nisar-tlm/
    ```
 
 1. Set the name of the evaluator to our NISAR example:
@@ -322,10 +322,10 @@ This guide provides a quick way to get started with our project. Please see our 
 
 #### Deploying an S3 Event Notification Trigger
 
-1. Change directory to the location of the s3_bucket_notification trigger terraform:
+1. Change directory to the location of the s3-bucket-notification trigger terraform:
 
    ```
-   cd ../../triggers/s3_bucket_notification/
+   cd ../../triggers/s3-bucket-notification/
    ```
 
 1. You will need an S3 bucket to configure event notification on. Create one or reuse an existing one (could be the same one in the previous steps) and set an environment variable for it:
@@ -382,10 +382,10 @@ This guide provides a quick way to get started with our project. Please see our 
 
 #### Deploying an EventBridge Scheduler Trigger
 
-1. Change directory to the location of the s3_bucket_notification trigger terraform:
+1. Change directory to the location of the scheduled-task trigger terraform:
 
    ```
-   cd ../scheduled_task/
+   cd ../scheduled-task/
    ```
 
 1. Note the implementation of the trigger lambda code. It currently hard codes a payload URL however in a real implementation, code would be written to query for new files from some REST API, database, etc. Here we simulate that and simply return a NISAR TLM file:
@@ -416,10 +416,10 @@ This guide provides a quick way to get started with our project. Please see our 
 
 #### Deploying an EventBridge Scheduler Trigger for Periodic CMR Queries
 
-1. Change directory to the location of the s3_bucket_notification trigger terraform:
+1. Change directory to the location of the cmr-query trigger terraform:
 
    ```
-   cd ../cmr_query/
+   cd ../cmr-query/
    ```
 
 1. Note the implementation of the trigger lambda code. It will query CMR for granules for a particular collection within a timeframe, query its dynamodb table if they already exist, and if not, submit them as payload URLs to the initiator SNS topic and save them into the dynamodb table:
