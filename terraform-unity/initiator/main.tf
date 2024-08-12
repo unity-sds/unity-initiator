@@ -40,6 +40,11 @@ resource "aws_lambda_function" "initiator_lambda" {
       ROUTER_CFG_URL = "s3://${aws_s3_object.router_config.bucket}/${aws_s3_object.router_config.key}"
     }
   }
+
+  tracing_config {
+    mode = "Active"
+  }
+
   tags = local.tags
 }
 
@@ -116,6 +121,11 @@ resource "aws_iam_role_policy_attachment" "lambda_base_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
+  role       = aws_iam_role.initiator_lambda_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}
+
 resource "aws_ssm_parameter" "initiator_lambda_function_name" {
   name  = "/unity/${var.project}/${var.venue}/od/initiator/lambda-name"
   type  = "String"
@@ -147,11 +157,6 @@ resource "aws_sqs_queue" "initiator_queue" {
   tags = local.tags
 }
 
-resource "aws_sns_topic" "initiator_topic" {
-  name = "${local.function_name}_topic"
-  tags = local.tags
-}
-
 resource "aws_sqs_queue_policy" "initiator_queue_policy" {
   queue_url = aws_sqs_queue.initiator_queue.id
   policy = jsonencode({
@@ -170,6 +175,12 @@ resource "aws_sqs_queue_policy" "initiator_queue_policy" {
       },
     ]
   })
+}
+
+resource "aws_sns_topic" "initiator_topic" {
+  name           = "${local.function_name}_topic"
+  tags           = local.tags
+  tracing_config = "Active"
 }
 
 resource "aws_sns_topic_subscription" "initiator_subscription" {

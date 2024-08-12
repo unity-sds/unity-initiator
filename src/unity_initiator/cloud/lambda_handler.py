@@ -4,9 +4,14 @@ from html import unescape
 from tempfile import mkstemp
 
 import smart_open
+from aws_xray_sdk.core import patch_all, xray_recorder
 
 from ..router import Router
 from ..utils.logger import logger
+
+# initialize the AWS X-Ray SDK
+patch_all()
+
 
 ROUTER = None
 
@@ -20,22 +25,24 @@ def lambda_handler_base(event, context):
     # or from a url in ROUTER_CFG_URL env variable.
     global ROUTER
     if ROUTER is None:
-        router_cfg = os.environ.get("ROUTER_CFG", "").strip()
-        router_cfg_url = os.environ.get("ROUTER_CFG_URL", "").strip()
-        if router_cfg == "":
-            if router_cfg_url != "":
-                with smart_open.open(router_cfg_url, "r") as f:
-                    router_cfg = f.read()
-            else:
-                raise RuntimeError(
-                    "No router configuration specified via ROUTER_CFG or ROUTER_CFG_URL env variables."
-                )
-        fd, router_file = mkstemp(prefix="router_", suffix=".yaml", text=True)
-        with os.fdopen(fd, "w") as f:
-            f.write(router_cfg)
-        ROUTER = Router(router_file)
-        os.unlink(router_file)
-    return ROUTER.execute_actions(event["payload"])
+        with xray_recorder.capture("read_router_config"):
+            router_cfg = os.environ.get("ROUTER_CFG", "").strip()
+            router_cfg_url = os.environ.get("ROUTER_CFG_URL", "").strip()
+            if router_cfg == "":
+                if router_cfg_url != "":
+                    with smart_open.open(router_cfg_url, "r") as f:
+                        router_cfg = f.read()
+                else:
+                    raise RuntimeError(
+                        "No router configuration specified via ROUTER_CFG or ROUTER_CFG_URL env variables."
+                    )
+            fd, router_file = mkstemp(prefix="router_", suffix=".yaml", text=True)
+            with os.fdopen(fd, "w") as f:
+                f.write(router_cfg)
+            ROUTER = Router(router_file)
+            os.unlink(router_file)
+    with xray_recorder.capture("execute_actions"):
+        return ROUTER.execute_actions(event["payload"])
 
 
 def lambda_handler_multiple_payloads(event, context):
