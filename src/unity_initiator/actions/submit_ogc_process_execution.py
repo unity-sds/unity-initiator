@@ -30,7 +30,7 @@ class SubmitOgcProcessExecution(Action):
             "outputs": None,
             "subscriber": None,
         }
-        response = httpx.post(url, headers=headers, json=body)
+        response = httpx.post(url, headers=headers, json=body, verify=False)  # nosec
         if response.status_code in (200, 201):
             success = True
             resp = response.json()

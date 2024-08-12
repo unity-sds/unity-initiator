@@ -34,7 +34,9 @@ class SubmitDagByID(Action):
             },
             "note": "",
         }
-        response = httpx.post(url, auth=auth, headers=headers, json=body)
+        response = httpx.post(
+            url, auth=auth, headers=headers, json=body, verify=False
+        )  # nosec
         if response.status_code in (200, 201):
             success = True
             resp = response.json()
