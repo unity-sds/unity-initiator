@@ -3,5 +3,5 @@ initiator_config:
   payload_type:
     url:
       - regexes:
-            - !!python/regexp '/(?P<id>SISTER_EMIT_L1B_RDN_(?P<observation_date_time>\d{8}T\d{6})_(?P<product_counter>)_OBS\.bin)$'
+            - '/(?P<id>SISTER_EMIT_L1B_RDN_(?P<observation_date_time>\d{8}T\d{6})_(?P<product_counter>)_OBS\.bin)$'
         evaluators:
