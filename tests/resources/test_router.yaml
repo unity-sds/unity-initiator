@@ -13,7 +13,7 @@ initiator_config:
 
       # SBG example: L1B data staged to S3 bucket and payload is S3 url
       - regexes:
-            - !!python/regexp '/(?P<id>SISTER_EMIT_L1B_RDN_(?P<observation_date_time>\d{8}T\d{6})_(?P<product_counter>\d{3})_OBS\.bin)$'
+            - '/(?P<id>SISTER_EMIT_L1B_RDN_(?P<observation_date_time>\d{8}T\d{6})_(?P<product_counter>\d{3})_OBS\.bin)$'
         evaluators:
 
           # If the regex matches, the router submits a JSON payload to the eval_sbg_l2_readiness SNS topic that contains
@@ -52,9 +52,9 @@ initiator_config:
 
       # M2020 example: xyz left finder; example of matching any one of a set of regexes
       - regexes:
-            - !!python/regexp 'ids-pipeline/pipes/nonlin_xyz_left/inputque/.L.{17}_.{3}RAS_N.{26}\.VIC-link'
-            - !!python/regexp 'ids-pipeline/pipes/nonlin_xyz_left/inputque/.R.{17}_.{3}RAS_N.{26}\.VIC-link'
-            - !!python/regexp 'ids-pipeline/pipes/nonlin_xyz_left/inputque/.L.{17}_.{3}DSP_N.{26}\.VIC-link'
+            - 'ids-pipeline/pipes/nonlin_xyz_left/inputque/.L.{17}_.{3}RAS_N.{26}\.VIC-link'
+            - 'ids-pipeline/pipes/nonlin_xyz_left/inputque/.R.{17}_.{3}RAS_N.{26}\.VIC-link'
+            - 'ids-pipeline/pipes/nonlin_xyz_left/inputque/.L.{17}_.{3}DSP_N.{26}\.VIC-link'
         evaluators:
 
           # If any of the regexes match, the router submits a JSON payload to the eval_m2020_xyz_left_finder SNS topic that contains
@@ -79,7 +79,7 @@ initiator_config:
 
       # NISAR example: GDS stages satellite telemetry to S3 bucket and payload is S3 url
       - regexes:
-            - !!python/regexp '/(?P<id>(?P<Mission>NISAR)_S(?P<SCID>\d{3})_(?P<Station>\w{2,3})_(?P<Antenna>\w{3,4})_M(?P<Mode>\d{2})_P(?P<Pass>\d{5})_R(?P<Receiver>\d{2})_C(?P<Channel>\d{2})_G(?P<Group>\d{2})_(?P<FileCreationDateTime>\d{4}_\d{3}_\d{2}_\d{2}_\d{2}_\d{6})\d{3}\.vc(?P<VCID>\w{2}))$'
+            - '/(?P<id>(?P<Mission>NISAR)_S(?P<SCID>\d{3})_(?P<Station>\w{2,3})_(?P<Antenna>\w{3,4})_M(?P<Mode>\d{2})_P(?P<Pass>\d{5})_R(?P<Receiver>\d{2})_C(?P<Channel>\d{2})_G(?P<Group>\d{2})_(?P<FileCreationDateTime>\d{4}_\d{3}_\d{2}_\d{2}_\d{2}_\d{6})\d{3}\.vc(?P<VCID>\w{2}))$'
         evaluators:
 
           # If the regex matches, the router submits a JSON payload to the eval_nisar_ingest SNS topic that contains
@@ -104,7 +104,7 @@ initiator_config:
 
       # NISAR example: GDS stages LDF (list of delivered files) to S3 bucket and payload is S3 url
       - regexes:
-            - !!python/regexp '/(?P<id>(?P<Mission>NISAR)_S(?P<SCID>\d{3})_(?P<Station>\w{2,3})_(?P<Antenna>\w{3,4})_M(?P<Mode>\d{2})_P(?P<Pass>\d{5})_R(?P<Receiver>\d{2})_C(?P<Channel>\d{2})_G(?P<Group>\d{2})_(?P<FileCreationDateTime>\d{4}_\d{3}_\d{2}_\d{2}_\d{2}_\d{5})(?P<R>\d{1,4})\.ldf)$'
+            - '/(?P<id>(?P<Mission>NISAR)_S(?P<SCID>\d{3})_(?P<Station>\w{2,3})_(?P<Antenna>\w{3,4})_M(?P<Mode>\d{2})_P(?P<Pass>\d{5})_R(?P<Receiver>\d{2})_C(?P<Channel>\d{2})_G(?P<Group>\d{2})_(?P<FileCreationDateTime>\d{4}_\d{3}_\d{2}_\d{2}_\d{2}_\d{5})(?P<R>\d{1,4})\.ldf)$'
         evaluators:
 
           # If the regex matches, the router submits a JSON payload to the eval_nisar_l0a_readiness DAG via Airflow REST API
@@ -132,7 +132,7 @@ initiator_config:
 
       # AIRS RetStd example: scheduled task to periodically check for new AIRS granules published to CMR
       - regexes:
-            - !!python/regexp '/(?P<id>(?P<instrument>AIRS)\.(?P<year>\d{4})\.(?P<month>\d{2})\.(?P<day>\d{2})\.(?P<granule_number>\d{3})\.(?P<level>L.+?)\.(?P<product_type>.+?)\.(?P<major_version>v\d+)\.(?P<minor_version>\d+)\.(?P<release_version>\d+)\.(?P<build_number>\d+)\.(?P<production_timestamp>.+?).hdf)$'
+            - '/(?P<id>(?P<instrument>AIRS)\.(?P<year>\d{4})\.(?P<month>\d{2})\.(?P<day>\d{2})\.(?P<granule_number>\d{3})\.(?P<level>L.+?)\.(?P<product_type>.+?)\.(?P<major_version>v\d+)\.(?P<minor_version>\d+)\.(?P<release_version>\d+)\.(?P<build_number>\d+)\.(?P<production_timestamp>.+?).hdf)$'
         evaluators:
 
           # If the regex matches, the router submits a JSON payload to the eval_airs_ingest SNS topic that contains
@@ -154,3 +154,19 @@ initiator_config:
                           airflow_base_api_endpoint: xxx
                           airflow_username: <SSM parameter, e.g. /unity/airflow/username> <ARN to username entry in AWS Secrets Manager>
                           airflow_password: <SSM parameter, e.g. /unity/airflow/password> <ARN to password entry in Secrets Manager>
+
+
+      - regexes:
+          - '(?<=/)(?P<filename>hello_world\.txt)$'
+        evaluators:
+          - name: eval_hello_world_readiness
+            actions:
+              - name: submit_ogc_process_execution
+                params:
+                  process_id: eval_hello_world_readiness
+                  ogc_processes_base_api_endpoint: ${ogc_processes_base_api_endpoint}
+                  on_success:
+                    actions:
+                      - name: submit_ogc_process_execution
+                        params:
+                          process_id: hello_world

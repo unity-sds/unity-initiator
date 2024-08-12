@@ -25,7 +25,7 @@ initiator_config:
 # Configuration for matching payload (e.g. url) against a set of compiled regular expressions
 # and mapping any matches to a set of evaluators.
 regex_config:
-  regexes: list(compiled_regex(), required=True, min=1)
+  regexes: list(str, required=True, min=1)
   evaluators: list(include("evaluator_config"), required=True, min=1)
 
 # Configuration of actions that submit to evaluators.
@@ -36,7 +36,7 @@ evaluator_config:
 # Currently only 2 types of actions are supported:
 # 1. submit payload to an SNS topic
 # 2. submit payload to an airflow DAG
-action_config: any(include("submit_dag_by_id_action"), include("submit_to_sns_topic_action"))
+action_config: any(include("submit_dag_by_id_action"), include("submit_to_sns_topic_action"), include("submit_ogc_process_execution_action"))
 
 # Configuration for submitting a payload to an airflow DAG.
 submit_dag_by_id_action:
@@ -56,6 +56,17 @@ submit_to_sns_topic_action:
     # if this was null, empty or absent, then the assumption is a SNS
     # topic in the local AWS account using the evaluator name as the SNS topic
     topic_arn: str(required=False)
+    on_success: include("on_success_actions", required=False)
+
+# Configuration for submitting a OGC process execution.
+submit_ogc_process_execution_action:
+  name: str(equals="submit_ogc_process_execution")
+  params:
+    process_id: str()
+    ogc_processes_base_api_endpoint: str(required=False)
+    execution_inputs: map(required=False)
+    execution_outputs: map(required=False)
+    execution_subscriber: map(required=False)
     on_success: include("on_success_actions", required=False)
 
 # Configuration to pass onto the evaluator to use when evaluation is a success.

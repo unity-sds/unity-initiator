@@ -1,5 +1,5 @@
 locals {
-  function_name = "${var.project}-${var.venue}-${var.deployment_name}-cmr_query"
+  function_name = "${var.project}-${var.venue}-cmr_query"
   tags = {
     Venue       = "dev"
     ServiceArea = "cs"
