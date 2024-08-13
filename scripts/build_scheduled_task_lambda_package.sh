@@ -3,7 +3,7 @@ BASE_PATH=$(dirname "${BASH_SOURCE}")
 BASE_PATH=$(cd "${BASE_PATH}/.."; pwd)
 DIST_DIR=${BASE_PATH}/dist
 PKG_DIR=${DIST_DIR}/lambda_packages
-SCHED_TASK_DIR=${BASE_PATH}/terraform-unity/triggers/scheduled_task-instrumented
+SCHED_TASK_DIR=${BASE_PATH}/terraform-unity/triggers/scheduled-task-instrumented
 
 set -ex
 

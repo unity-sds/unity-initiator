@@ -230,7 +230,13 @@ This guide provides a quick way to get started with our project. Please see our 
    cd unity-initiator/terraform-unity/initiator/
    ```
 
-1. Copy a sample router configuration YAML file to use for deployment and update the AWS region and AWS account ID to match your AWS environment. We will be using the NISAR TLM test case for this demo so we also rename the SNS topic ARN for it accordingly:
+1. You will need an S3 bucket for terraform to stage the router Lambda zip file and router configuration YAML file during deployment. Create one or reuse an existing one and set an environment variable for it:
+
+   ```
+   export CODE_BUCKET=<some S3 bucket name>
+   ```
+
+1. Copy a sample router configuration YAML file to use for deployment and update the AWS region and AWS account ID to match your AWS environment. We will be using the NISAR TLM test case for this demo so we also rename the SNS topic ARN for it accordingly. We then upload the router configuration file:
 
    ```
    cp ../../tests/resources/test_router.yaml .
@@ -239,18 +245,7 @@ This guide provides a quick way to get started with our project. Please see our 
    sed -i "s/hilo-hawaii-1/${AWS_REGION}/g" test_router.yaml
    sed -i "s/123456789012:eval_nisar_ingest/${AWS_ACCOUNT_ID}:uod-dev-eval_nisar_ingest-evaluator_topic/g" test_router.yaml
    sed -i "s/123456789012:eval_airs_ingest/${AWS_ACCOUNT_ID}:uod-dev-eval_airs_ingest-evaluator_topic/g" test_router.yaml
-   ```
-
-1. You will need an S3 bucket for terraform to stage the router Lambda zip file during deployment. Create one or reuse an existing one and set an environment variable for it:
-
-   ```
-   export CODE_BUCKET=<some S3 bucket name>
-   ```
-
-1. You will need an S3 bucket to store the router configuration YAML file. Create one or reuse an existing one (could be the same one in the previous step) and set an environment variable for it:
-
-   ```
-   export CONFIG_BUCKET=<some S3 bucket name>
+   aws s3 cp test_router.yaml s3://${CODE_BUCKET}/test_router.yaml
    ```
 
 1. Set a project name:
@@ -271,16 +266,27 @@ This guide provides a quick way to get started with our project. Please see our 
    terraform apply \
      --var project=${PROJECT} \
      --var code_bucket=${CODE_BUCKET} \
-     --var config_bucket=${CONFIG_BUCKET} \
-     --var router_config=test_router.yaml \
+     --var router_config=s3://${CODE_BUCKET}/test_router.yaml \
      -auto-approve
    ```
 
    **Take note of the `initiator_topic_arn` that is output by terraform. It will be used when setting up any triggers.**
 
-#### Deploying an Example Evaluator (SNS topic->SQS queue->Lambda)
+#### Deploying Example Evaluators (SNS topic->SQS queue->Lambda)
 
-1. Change directory to the location of the sns-sqs-lambda evaluator terraform:
+In this demo we will deploy 2 evaluators:
+
+1. `eval_nisar_ingest` - evaluate ingestion of NISAR telemetry files deposited into the ISL bucket
+
+1. `eval_airs_ingest` - evaluate ingestion of AIRS RetStd files returned by a periodic CMR query
+
+##### Evaluator Deployment for NISAR TLM (via staged data to the ISL)
+1. Change directory to the location of the evaluators terraform:
+   ```
+   cd ../evaluators
+   ```
+
+1. Make a copy of the `sns_sqs_lambda` directory for the NISAR TLM evaluator:
 
    ```
    cp -rp sns-sqs-lambda sns-sqs-lambda-nisar-tlm
@@ -319,6 +325,46 @@ This guide provides a quick way to get started with our project. Please see our 
    ```
 
    **Take note of the `evaluator_topic_arn` that is output by terraform. It should match the topic ARN in the test_router.yaml file you used during the initiator deployment. If they match then the router Lambda is now able to submit payloads to this evaluator SNS topic.**
+
+##### Evaluator Deployment for AIRS RetStd (via scheduled CMR query)
+1. Change directory to the location of the evaluators terraform:
+   ```
+   cd ..
+   ```
+
+1. Make a copy of the `sns_sqs_lambda` directory for the AIRS RetStd evaluator:
+   ```
+   cp -rp sns-sqs-lambda sns-sqs-lambda-airs-retstd
+   ```
+
+1. Change directory into the AIRS RetStd evaluator terraform:
+   ```
+   cd sns-sqs-lambda-airs-retstd/
+   ```
+
+1. Set the name of the evaluator to our AIRS example:
+   ```
+   export EVALUATOR_NAME=eval_airs_ingest
+   ```
+
+1. Note the implementation of the evaluator code. It currently doesn't do any real evaluation but simply returns that evaluation was successful:
+   ```
+   cat data.tf
+   ```
+
+1. Initialize terraform:
+   ```
+   terraform init
+   ```
+
+1. Run terraform apply:
+   ```
+   terraform apply \
+     --var evaluator_name=${EVALUATOR_NAME} \
+     -auto-approve
+   ```
+
+   **Take note of the `evaluator_topic_arn` that is output by terraform. It should match the respective topic ARN in the test_router.yaml file you used during the initiator deployment. If they match then the router Lambda is now able to submit payloads to this evaluator SNS topic.**
 
 #### Deploying an S3 Event Notification Trigger
 

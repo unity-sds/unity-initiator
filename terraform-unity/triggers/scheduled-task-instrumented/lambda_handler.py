@@ -25,9 +25,11 @@ def lambda_handler(event, context):
             TopicArn=INITIATOR_TOPIC_ARN,
             Subject="Scheduled Task",
             Message=json.dumps(
-                {
-                    "payload": "s3://bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc25"
-                }
+                [
+                    {
+                        "payload": "s3://bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_17_57_57_714280000.vc25"
+                    }
+                ]
             ),
         )
         return {"success": True, "response": res}
