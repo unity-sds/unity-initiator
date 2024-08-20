@@ -33,6 +33,7 @@ No modules.
 | [aws_iam_policy.scheduler](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.cmr_query_lambda_iam_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.scheduler](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.aws_xray_write_only_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.lambda_base_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.lambda_dynamodb_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.lambda_sns_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -55,7 +56,7 @@ No modules.
 | <a name="input_initiator_topic_arn"></a> [initiator\_topic\_arn](#input\_initiator\_topic\_arn) | The ARN of the initiator SNS topic to publish S3 events to | `string` | n/a | yes |
 | <a name="input_project"></a> [project](#input\_project) | The unity project its installed into | `string` | `"uod"` | no |
 | <a name="input_provider_id"></a> [provider\_id](#input\_provider\_id) | The short name for the data provider: https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html#granule-search-by-parameters | `string` | n/a | yes |
-| <a name="input_schedule_expression"></a> [schedule\_expression](#input\_schedule\_expression) | The schedule expression to use for executing the CMR query lambda: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html | `string` | `"rate(1 minute)"` | no |
+| <a name="input_schedule_expression"></a> [schedule\_expression](#input\_schedule\_expression) | The schedule expression to use for executing the CMR query lambda: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html | `string` | `"rate(5 minutes)"` | no |
 | <a name="input_seconds_back"></a> [seconds\_back](#input\_seconds\_back) | Number of seconds back from the current time. Used to create a start and end timerange for a temporal search on granules in the data collection. | `number` | n/a | yes |
 | <a name="input_venue"></a> [venue](#input\_venue) | The unity venue its installed into | `string` | `"dev"` | no |
 

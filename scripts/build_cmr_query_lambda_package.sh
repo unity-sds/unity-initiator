@@ -15,6 +15,7 @@ VERSION=$(hatch run python -c 'from importlib.metadata import version; print(ver
 echo "{\"version\": \"$VERSION\"}" > ${DIST_DIR}/version.json
 mkdir -p $PKG_DIR
 pip install -t $PKG_DIR ${DIST_DIR}/unity_initiator-*.whl
+pip install -t $PKG_DIR aws_xray_sdk
 pip install -t $PKG_DIR python_cmr
 cp ${CMR_QUERY_DIR}/lambda_handler.py $PKG_DIR/
 cd $PKG_DIR
