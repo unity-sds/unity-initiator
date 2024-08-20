@@ -16,6 +16,10 @@ resource "aws_lambda_function" "evaluator_lambda" {
   filename         = "${path.root}/.archive_files/${var.evaluator_name}-evaluator_lambda.zip"
   source_code_hash = data.archive_file.evaluator_lambda_artifact.output_base64sha256
   tags             = local.tags
+
+  tracing_config {
+    mode = "Active"
+  }
 }
 
 resource "aws_cloudwatch_log_group" "evaluator_lambda_log_group" {
@@ -83,6 +87,11 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 resource "aws_iam_role_policy_attachment" "lambda_base_policy_attachment" {
   role       = aws_iam_role.evaluator_lambda_iam_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
+  role       = aws_iam_role.evaluator_lambda_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
 }
 
 resource "aws_ssm_parameter" "evaluator_lambda_function_name" {
