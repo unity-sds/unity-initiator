@@ -40,7 +40,7 @@ def lambda_handler(event, context):
             trace_id = generate_trace_id(start_time)
             segment_id = generate_segment_id()
         else:
-            d = { k:v for k,v in [i.split("=") for i in d.split(";")]}
+            d = { k:v for k,v in [i.split("=") for i in aws_trace_header.split(";")]}
             trace_id = d.get("Root", generate_trace_id(start_time))
             segment_id = d.get("Parent", generate_segment_id())
 
