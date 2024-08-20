@@ -41,8 +41,8 @@ def lambda_handler_base(event, context):
                 f.write(router_cfg)
             ROUTER = Router(router_file)
             os.unlink(router_file)
-    with xray_recorder.capture("execute_actions") as subsegment:
-        subsegment.put_annotation("payload", event["payload"])
+    with xray_recorder.capture("execute_actions"):
+        xray_recorder.put_annotation("payload", event["payload"])
         return ROUTER.execute_actions(event["payload"])
 
 
