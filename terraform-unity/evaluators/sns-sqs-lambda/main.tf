@@ -127,7 +127,9 @@ resource "aws_sqs_queue" "evaluator_queue" {
 }
 
 resource "aws_sns_topic" "evaluator_topic" {
-  name = "${local.function_name}_topic"
+  name           = "${local.function_name}_topic"
+  tags           = local.tags
+  tracing_config = "Active"
 }
 
 resource "aws_sns_topic_policy" "evaluator_topic_policy" {
