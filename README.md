@@ -307,7 +307,7 @@ In this demo we will deploy 2 evaluators:
 1. Note the implementation of the evaluator code. It currently doesn't do any real evaluation but simply returns that evaluation was successful:
 
    ```
-   cat data.tf
+   cat lambda_handler.py
    ```
 
 1. Initialize terraform:
@@ -321,6 +321,7 @@ In this demo we will deploy 2 evaluators:
    ```
    terraform apply \
      --var evaluator_name=${EVALUATOR_NAME} \
+     --var code_bucket=${CODE_BUCKET} \
      -auto-approve
    ```
 
@@ -349,7 +350,7 @@ In this demo we will deploy 2 evaluators:
 
 1. Note the implementation of the evaluator code. It currently doesn't do any real evaluation but simply returns that evaluation was successful:
    ```
-   cat data.tf
+   cat lambda_handler.py
    ```
 
 1. Initialize terraform:
@@ -361,6 +362,7 @@ In this demo we will deploy 2 evaluators:
    ```
    terraform apply \
      --var evaluator_name=${EVALUATOR_NAME} \
+     --var code_bucket=${CODE_BUCKET} \
      -auto-approve
    ```
 
