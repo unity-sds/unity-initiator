@@ -1,21 +1,32 @@
-# setup the actual lambda resource
-resource "aws_lambda_function" "evaluator_lambda" {
-  lifecycle {
-    # make sure tf doesn't overwrite deployed code once we start deploying
-    ignore_changes = [
-      filename,
-      source_code_hash,
-    ]
+resource "null_resource" "build_lambda_package" {
+  triggers = { always_run = timestamp() }
+  provisioner "local-exec" {
+    command = <<EOF
+      set -ex
+      docker run --rm -v ${path.module}/../../..:/var/task mlupin/docker-lambda:python3.9-build ./terraform-unity/evaluators/${basename(path.cwd)}/build_lambda_package.sh ${var.evaluator_name}
+    EOF
   }
+}
 
-  function_name    = local.function_name
-  role             = aws_iam_role.evaluator_lambda_iam_role.arn
-  handler          = "lambda_function.lambda_handler"
-  runtime          = "python3.11"
-  timeout          = 900
-  filename         = "${path.root}/.archive_files/${var.evaluator_name}-evaluator_lambda.zip"
-  source_code_hash = data.archive_file.evaluator_lambda_artifact.output_base64sha256
-  tags             = local.tags
+resource "aws_s3_object" "lambda_package" {
+  depends_on = [null_resource.build_lambda_package]
+  bucket     = var.code_bucket
+  key        = "${var.evaluator_name}-${jsondecode(data.local_file.version.content).version}-lambda.zip"
+  source     = "${path.module}/../../../dist/${var.evaluator_name}-${jsondecode(data.local_file.version.content).version}-lambda.zip"
+  etag       = filemd5("${path.module}/../../../dist/${var.evaluator_name}-${jsondecode(data.local_file.version.content).version}-lambda.zip")
+  tags       = local.tags
+}
+
+resource "aws_lambda_function" "evaluator_lambda" {
+  depends_on    = [aws_s3_object.lambda_package, aws_cloudwatch_log_group.evaluator_lambda_log_group]
+  function_name = local.function_name
+  s3_bucket     = var.code_bucket
+  s3_key        = "${var.evaluator_name}-${jsondecode(data.local_file.version.content).version}-lambda.zip"
+  handler       = "lambda_handler.lambda_handler"
+  runtime       = "python3.11"
+  role          = aws_iam_role.evaluator_lambda_iam_role.arn
+  timeout       = 900
+  tags          = local.tags
 
   tracing_config {
     mode = "Active"
