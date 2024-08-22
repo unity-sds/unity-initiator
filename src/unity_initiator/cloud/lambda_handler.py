@@ -16,6 +16,7 @@ patch_all()
 ROUTER = None
 
 
+@xray_recorder.capture("lambda_handler_base")
 def lambda_handler_base(event, context):
     """Base lambda handler that instantiates a router, globally, and executes actions for a single payload."""
 
@@ -25,25 +26,23 @@ def lambda_handler_base(event, context):
     # or from a url in ROUTER_CFG_URL env variable.
     global ROUTER
     if ROUTER is None:
-        with xray_recorder.capture("read_router_config"):
-            router_cfg = os.environ.get("ROUTER_CFG", "").strip()
-            router_cfg_url = os.environ.get("ROUTER_CFG_URL", "").strip()
-            if router_cfg == "":
-                if router_cfg_url != "":
-                    with smart_open.open(router_cfg_url, "r") as f:
-                        router_cfg = f.read()
-                else:
-                    raise RuntimeError(
-                        "No router configuration specified via ROUTER_CFG or ROUTER_CFG_URL env variables."
-                    )
-            fd, router_file = mkstemp(prefix="router_", suffix=".yaml", text=True)
-            with os.fdopen(fd, "w") as f:
-                f.write(router_cfg)
-            ROUTER = Router(router_file)
-            os.unlink(router_file)
-    with xray_recorder.capture("execute_actions"):
-        xray_recorder.put_annotation("payload", event["payload"])
-        return ROUTER.execute_actions(event["payload"])
+        router_cfg = os.environ.get("ROUTER_CFG", "").strip()
+        router_cfg_url = os.environ.get("ROUTER_CFG_URL", "").strip()
+        if router_cfg == "":
+            if router_cfg_url != "":
+                with smart_open.open(router_cfg_url, "r") as f:
+                    router_cfg = f.read()
+            else:
+                raise RuntimeError(
+                    "No router configuration specified via ROUTER_CFG or ROUTER_CFG_URL env variables."
+                )
+        fd, router_file = mkstemp(prefix="router_", suffix=".yaml", text=True)
+        with os.fdopen(fd, "w") as f:
+            f.write(router_cfg)
+        ROUTER = Router(router_file)
+        os.unlink(router_file)
+    xray_recorder.put_annotation("payload", event["payload"])
+    return ROUTER.execute_actions(event["payload"])
 
 
 def lambda_handler_multiple_payloads(event, context):
