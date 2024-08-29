@@ -4,15 +4,17 @@ import os
 import boto3
 from aws_xray_sdk.core import patch_all, xray_recorder
 
-patch_all()
+from unity_initiator.utils.logger import log_exceptions, logger
 
+patch_all()
 
 INITIATOR_TOPIC_ARN = os.environ["INITIATOR_TOPIC_ARN"]
 
 
+@log_exceptions
 def lambda_handler(event, context):
-    print(f"event: {json.dumps(event, indent=2)}")
-    print(f"context: {context}")
+    logger.info("event: %s", json.dumps(event, indent=2))
+    logger.info("context: %s", context)
 
     # implement your adaptation-specific trigger code here and submit payloads
     # to the SNS topic as either a list of payloads or a single payload. Below

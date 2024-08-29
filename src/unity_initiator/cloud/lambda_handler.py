@@ -7,7 +7,7 @@ import smart_open
 from aws_xray_sdk.core import patch_all, xray_recorder
 
 from ..router import Router
-from ..utils.logger import logger
+from ..utils.logger import log_exceptions, logger
 
 # initialize the AWS X-Ray SDK
 patch_all()
@@ -16,6 +16,7 @@ patch_all()
 ROUTER = None
 
 
+@log_exceptions
 @xray_recorder.capture("lambda_handler_base")
 def lambda_handler_base(event, context):
     """Base lambda handler that instantiates a router, globally, and executes actions for a single payload."""

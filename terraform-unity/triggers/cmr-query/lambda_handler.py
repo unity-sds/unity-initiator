@@ -6,7 +6,7 @@ import boto3
 from aws_xray_sdk.core import patch_all, xray_recorder
 from cmr import GranuleQuery
 
-from unity_initiator.utils.logger import logger
+from unity_initiator.utils.logger import log_exceptions, logger
 
 patch_all()
 
@@ -32,6 +32,7 @@ def submit_urls_and_bookkeep(sns_client, urls_to_send, table, granules_to_save):
     return res
 
 
+@log_exceptions
 def lambda_handler(event, context):
     logger.info("event: %s", json.dumps(event, indent=2))
     logger.info("context: %s", context)
