@@ -23,7 +23,7 @@ variable "initiator_topic_arn" {
 variable "schedule_expression" {
   description = "The schedule expression to use for executing the CMR query lambda: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html"
   type        = string
-  default     = "rate(1 minute)"
+  default     = "rate(5 minutes)"
 }
 
 variable "provider_id" {

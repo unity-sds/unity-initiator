@@ -1,5 +1,5 @@
-variable "evaluator_name" {
-  description = "The evaluator name"
+variable "deployment_name" {
+  description = "The deployment name"
   type        = string
 }
 
@@ -17,5 +17,10 @@ variable "venue" {
 
 variable "code_bucket" {
   description = "The S3 bucket where lambda zip files will be stored and accessed"
+  type        = string
+}
+
+variable "initiator_topic_arn" {
+  description = "The ARN of the initiator SNS topic to publish S3 events to"
   type        = string
 }

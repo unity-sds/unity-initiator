@@ -107,6 +107,11 @@ resource "aws_iam_role_policy_attachment" "lambda_dynamodb_policy_attachment" {
   policy_arn = aws_iam_policy.dynamodb_crud_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
+  role       = aws_iam_role.cmr_query_lambda_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}
+
 resource "aws_lambda_function" "cmr_query_lambda" {
   depends_on    = [aws_s3_object.lambda_package, aws_cloudwatch_log_group.cmr_query_lambda_log_group]
   function_name = local.function_name
@@ -123,6 +128,11 @@ resource "aws_lambda_function" "cmr_query_lambda" {
       DYNAMODB_TABLE_NAME = aws_dynamodb_table.cmr_table.name
     }
   }
+
+  tracing_config {
+    mode = "Active"
+  }
+
   tags = local.tags
 }
 

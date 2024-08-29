@@ -4,13 +4,19 @@ from html import unescape
 from tempfile import mkstemp
 
 import smart_open
+from aws_xray_sdk.core import patch_all, xray_recorder
 
 from ..router import Router
 from ..utils.logger import logger
 
+# initialize the AWS X-Ray SDK
+patch_all()
+
+
 ROUTER = None
 
 
+@xray_recorder.capture("lambda_handler_base")
 def lambda_handler_base(event, context):
     """Base lambda handler that instantiates a router, globally, and executes actions for a single payload."""
 
@@ -35,6 +41,7 @@ def lambda_handler_base(event, context):
             f.write(router_cfg)
         ROUTER = Router(router_file)
         os.unlink(router_file)
+    xray_recorder.put_annotation("payload", event["payload"])
     return ROUTER.execute_actions(event["payload"])
 
 
