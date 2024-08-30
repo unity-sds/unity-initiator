@@ -41,12 +41,19 @@ resource "aws_lambda_function" "scheduled_task_lambda" {
       INITIATOR_TOPIC_ARN = var.initiator_topic_arn
     }
   }
+
+  logging_config {
+    log_format = "Text"
+    log_group  = "/unity/log/${var.project}-${var.venue}-initiator-centralized-log-group"
+  }
+
   tags = local.tags
 }
 
-resource "aws_cloudwatch_log_group" "scheduled_task_lambda_log_group" {
-  name              = "/aws/lambda/${local.function_name}"
-  retention_in_days = 14
+resource "aws_lambda_function_event_invoke_config" "invoke_config" {
+  function_name                = aws_lambda_function.scheduled_task_lambda.function_name
+  maximum_event_age_in_seconds = 21600
+  maximum_retry_attempts       = 0
 }
 
 resource "aws_iam_role" "scheduler" {

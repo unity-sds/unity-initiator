@@ -21,7 +21,7 @@ def lambda_handler(event, context):
     # is an example of a single payload.
     # Finally return True if it successful. False otherwise.
 
-    with xray_recorder.capture("publish_url_to_inititator_topic"):
+    with xray_recorder.capture("publish_url_to_initiator_topic"):
         client = boto3.client("sns")
         res = client.publish(
             TopicArn=INITIATOR_TOPIC_ARN,

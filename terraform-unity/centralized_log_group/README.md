@@ -36,5 +36,5 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_centralized_log_group_arn"></a> [centralized\_log\_group\_arn](#output\_centralized\_log\_group\_arn) | The ARN of the centralized log group |
+| <a name="output_centralized_log_group_name"></a> [centralized\_log\_group\_name](#output\_centralized\_log\_group\_name) | The name of the centralized log group |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

@@ -1,5 +1,5 @@
 locals {
-  log_group_name = "${var.project}-${var.venue}-inititator-centralized-log-group"
+  log_group_name = "${var.project}-${var.venue}-initiator-centralized-log-group"
   tags = {
     Venue       = "dev"
     ServiceArea = "cs"
