@@ -64,7 +64,9 @@ def test_routing_sbg_url():
     for evaluator in evaluators:
         assert isinstance(evaluator, Evaluator)
         assert evaluator.name == "eval_sbg_l2_readiness"
-        topic_arn = client.create_topic(Name=evaluator.name)["TopicArn"]
+        topic_arn = client.create_topic(
+            Name=evaluator.name, Attributes={"TracingConfig": "Active"}
+        )["TopicArn"]
         actions = list(evaluator.get_actions())
         assert len(actions) == 1
         for action in actions:
@@ -83,7 +85,10 @@ def test_execute_actions_for_sbg_url():
     client = boto3.client("sns")
     router_file = files("tests.resources").joinpath("test_router.yaml")
     router = Router(router_file)
-    client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
+    client.create_topic(
+        Name=list(router.get_evaluators_by_url(url))[0].name,
+        Attributes={"TracingConfig": "Active"},
+    )
     results = router.execute_actions(url)
     logger.info("results: %s", results)
     for res in results:
@@ -103,7 +108,10 @@ def test_execute_actions_for_m2020_url():
         "ML01234567891011121_000DSP_N01234567890101112131415161.VIC-link",
     ):
         url = f"s3://bucket/ids-pipeline/pipes/nonlin_xyz_left/inputque/{test_file}"
-        client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
+        client.create_topic(
+            Name=list(router.get_evaluators_by_url(url))[0].name,
+            Attributes={"TracingConfig": "Active"},
+        )
         results = router.execute_actions(url)
         logger.info("results: %s", results)
         for res in results:
@@ -118,7 +126,10 @@ def test_execute_actions_for_nisar_telemetry_url():
     client = boto3.client("sns")
     router_file = files("tests.resources").joinpath("test_router.yaml")
     router = Router(router_file)
-    client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
+    client.create_topic(
+        Name=list(router.get_evaluators_by_url(url))[0].name,
+        Attributes={"TracingConfig": "Active"},
+    )
     results = router.execute_actions(url)
     logger.info("results: %s", results)
     for res in results:
@@ -157,7 +168,10 @@ def test_execute_actions_for_nisar_ldf_url():
     client = boto3.client("sns")
     router_file = files("tests.resources").joinpath("test_router.yaml")
     router = Router(router_file)
-    client.create_topic(Name=list(router.get_evaluators_by_url(url))[0].name)
+    client.create_topic(
+        Name=list(router.get_evaluators_by_url(url))[0].name,
+        Attributes={"TracingConfig": "Active"},
+    )
     results = router.execute_actions(url)
     logger.info("results: %s", results)
     for res in results:

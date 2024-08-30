@@ -24,7 +24,7 @@ def log_exceptions(lambda_handler):
     @wraps(lambda_handler)
     def wrapper(event, context):
         try:
-            lambda_handler(event, context)
+            return lambda_handler(event, context)
         except Exception as err:
             tb = traceback.format_exc()
             logger.exception("Got exception: %s\n%s", str(err), tb)
