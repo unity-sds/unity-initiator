@@ -216,7 +216,7 @@ This guide provides a quick way to get started with our project. Please see our 
 
 ### Setting Up the End-to-End Demo
 
-#### Deploying the Initiator
+#### Create the centralized log group
 
 1. Clone repo:
 
@@ -224,10 +224,48 @@ This guide provides a quick way to get started with our project. Please see our 
    git clone https://github.com/unity-sds/unity-initiator.git
    ```
 
+1. Change directory to the location of the centralized log group terraform:
+
+   ```
+   cd unity-initiator/terraform-unity/centralized_log_group/
+   ```
+
+1. Set up environment variables for `project` (by default `uod`) and venue (by default `dev`):
+
+   ```
+   export PROJECT=<your project, e.g. uod>
+   export VENUE=<your venue, e.g. dev>
+   ```
+
+1. Initialize terraform:
+
+   ```
+   terraform init
+   ```
+
+1. Run terraform apply:
+
+   ```
+   terraform apply \
+     --var project=${PROJECT} \
+     --var venue=${VENUE} \
+     -auto-approve
+   ```
+
+   **Take note of the `centralized_log_group_name` that is output by terraform. It will be used when setting up other resources (e.g. initiator, trigger and evaluator lambdas).**
+
+1. Export the `centralized_log_group_name` that was output from the centralized log group terraform deployment:
+
+   ```
+   export CENTRALIZED_LOG_GROUP=<your log group name, e.g. /unity/log/uod-dev-initiator-centralized-log-group>
+   ```
+
+#### Deploying the Initiator
+
 1. Change directory to the location of the inititator terraform:
 
    ```
-   cd unity-initiator/terraform-unity/initiator/
+   cd ../initiator/
    ```
 
 1. You will need an S3 bucket for terraform to stage the router Lambda zip file and router configuration YAML file during deployment. Create one or reuse an existing one and set an environment variable for it:
@@ -248,12 +286,6 @@ This guide provides a quick way to get started with our project. Please see our 
    aws s3 cp test_router.yaml s3://${CODE_BUCKET}/test_router.yaml
    ```
 
-1. Set a project name:
-
-   ```
-   export PROJECT=gmanipon-test
-   ```
-
 1. Initialize terraform:
 
    ```
@@ -265,12 +297,19 @@ This guide provides a quick way to get started with our project. Please see our 
    ```
    terraform apply \
      --var project=${PROJECT} \
+     --var venue=${VENUE} \
      --var code_bucket=${CODE_BUCKET} \
      --var router_config=s3://${CODE_BUCKET}/test_router.yaml \
      -auto-approve
    ```
 
    **Take note of the `initiator_topic_arn` that is output by terraform. It will be used when setting up any triggers.**
+
+1. Export the `initiator_topic_arn` that was output from the initiator terraform deployment:
+
+   ```
+   export INITIATOR_TOPIC_ARN=<initiator topic ARN>
+   ```
 
 #### Deploying Example Evaluators (SNS topic->SQS queue->Lambda)
 
@@ -320,6 +359,8 @@ In this demo we will deploy 2 evaluators:
 
    ```
    terraform apply \
+     --var project=${PROJECT} \
+     --var venue=${VENUE} \
      --var evaluator_name=${EVALUATOR_NAME} \
      --var code_bucket=${CODE_BUCKET} \
      -auto-approve
@@ -361,6 +402,8 @@ In this demo we will deploy 2 evaluators:
 1. Run terraform apply:
    ```
    terraform apply \
+     --var project=${PROJECT} \
+     --var venue=${VENUE} \
      --var evaluator_name=${EVALUATOR_NAME} \
      --var code_bucket=${CODE_BUCKET} \
      -auto-approve
@@ -448,11 +491,12 @@ In this demo we will deploy 2 evaluators:
    terraform init
    ```
 
-1. Run terraform apply. Note the PROJECT and INITIATOR_TOPIC_ARN environment variables should have been set in the previous steps. If not set them again:
+1. Run terraform apply. Note the PROJECT, VENUE and INITIATOR_TOPIC_ARN environment variables should have been set in the previous steps. If not set them again:
 
    ```
    terraform apply \
      --var project=${PROJECT} \
+     --var venue=${VENUE} \
      --var initiator_topic_arn=${INITIATOR_TOPIC_ARN} \
      -auto-approve
    ```
@@ -505,6 +549,7 @@ In this demo we will deploy 2 evaluators:
    ```
    terraform apply \
      --var project=${PROJECT} \
+     --var venue=${VENUE} \
      --var code_bucket=${CODE_BUCKET} \
      --var initiator_topic_arn=${INITIATOR_TOPIC_ARN} \
      --var provider_id=${PROVIDER_ID} \
