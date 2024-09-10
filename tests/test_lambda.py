@@ -50,9 +50,15 @@ def setup_mock_resources():
 
     # create mock SNS topics
     sns_client = boto3.client("sns")
-    sns_client.create_topic(Name="eval_sbg_l2_readiness")
-    sns_client.create_topic(Name="eval_m2020_xyz_left_finder")
-    sns_client.create_topic(Name="eval_nisar_ingest")
+    sns_client.create_topic(
+        Name="eval_sbg_l2_readiness", Attributes={"TracingConfig": "Active"}
+    )
+    sns_client.create_topic(
+        Name="eval_m2020_xyz_left_finder", Attributes={"TracingConfig": "Active"}
+    )
+    sns_client.create_topic(
+        Name="eval_nisar_ingest", Attributes={"TracingConfig": "Active"}
+    )
 
     # mock airflow REST API
     respx.post("https://example.com/api/v1/dags/eval_nisar_l0a_readiness/dagRuns").mock(
@@ -174,6 +180,7 @@ class TestLambdaInvocations:
             MemorySize=128,
             Publish=True,
             Environment={"Variables": {"ROUTER_CFG": cls.router_cfg}},
+            TracingConfig={"Mode": "Active"},
         )
 
     @classmethod
@@ -288,7 +295,9 @@ class TestInitiatorLambda:
 
         # create mock SNS topic for initiator
         cls.sns_client = boto3.client("sns")
-        cls.sns_topic_initiator = cls.sns_client.create_topic(Name="initiator_topic")
+        cls.sns_topic_initiator = cls.sns_client.create_topic(
+            Name="initiator_topic", Attributes={"TracingConfig": "Active"}
+        )
 
         # create mock SQS queues
         cls.sqs_client = boto3.client("sqs")
@@ -356,6 +365,7 @@ class TestInitiatorLambda:
                     "ROUTER_CFG_URL": f"s3://{cls.bucket_name}/test_router.yaml"
                 }
             },
+            TracingConfig={"Mode": "Active"},
         )
 
         # create event source mapping

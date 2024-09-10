@@ -52,7 +52,7 @@ resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
 }
 
 resource "aws_lambda_function" "scheduled_task_lambda" {
-  depends_on    = [aws_s3_object.lambda_package, aws_cloudwatch_log_group.scheduled_task_lambda_log_group]
+  depends_on    = [aws_s3_object.lambda_package]
   function_name = local.function_name
   s3_bucket     = var.code_bucket
   s3_key        = "scheduled_task-${jsondecode(data.local_file.version.content).version}-lambda.zip"
@@ -71,16 +71,22 @@ resource "aws_lambda_function" "scheduled_task_lambda" {
     mode = "Active"
   }
 
+  logging_config {
+    log_format = "Text"
+    log_group  = "/unity/log/${var.project}-${var.venue}-initiator-centralized-log-group"
+  }
+
   tags = local.tags
 }
 
-resource "aws_cloudwatch_log_group" "scheduled_task_lambda_log_group" {
-  name              = "/aws/lambda/${local.function_name}"
-  retention_in_days = 14
+resource "aws_lambda_function_event_invoke_config" "invoke_config" {
+  function_name                = aws_lambda_function.scheduled_task_lambda.function_name
+  maximum_event_age_in_seconds = 21600
+  maximum_retry_attempts       = 0
 }
 
 resource "aws_iam_role" "scheduler" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-cron-scheduler-role"
+  name = "${var.project}-${var.venue}-cron-scheduler-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -98,7 +104,7 @@ resource "aws_iam_role" "scheduler" {
 }
 
 resource "aws_iam_policy" "scheduler" {
-  name = "${var.project}-${var.venue}-${var.deployment_name}-cron-scheduler-policy"
+  name = "${var.project}-${var.venue}-cron-scheduler-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -120,7 +126,7 @@ resource "aws_iam_role_policy_attachment" "scheduler" {
 }
 
 resource "aws_scheduler_schedule" "run_scheduled_task" {
-  name                = "${var.project}-${var.venue}-${var.deployment_name}-run_scheduled_task"
+  name                = "${var.project}-${var.venue}-run_scheduled_task"
   schedule_expression = "rate(1 minute)"
   flexible_time_window {
     mode = "OFF"

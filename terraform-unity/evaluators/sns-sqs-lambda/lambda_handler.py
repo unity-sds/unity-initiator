@@ -2,7 +2,7 @@ import json
 
 from aws_xray_sdk.core import patch_all, xray_recorder
 
-from unity_initiator.utils.logger import logger
+from unity_initiator.utils.logger import log_exceptions, logger
 
 patch_all()
 
@@ -17,6 +17,7 @@ def perform_evaluation(event, context):
     return True
 
 
+@log_exceptions
 def lambda_handler(event, context):
     with xray_recorder.capture(context.function_name):
         return {"success": perform_evaluation(event, context)}

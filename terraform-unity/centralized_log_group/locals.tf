@@ -1,5 +1,5 @@
 locals {
-  function_name = "${var.project}-${var.venue}-initiator"
+  log_group_name = "${var.project}-${var.venue}-initiator-centralized-log-group"
   tags = {
     Venue       = "dev"
     ServiceArea = "cs"
