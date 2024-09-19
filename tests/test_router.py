@@ -178,6 +178,38 @@ def test_execute_actions_for_nisar_ldf_url():
         assert res["success"]
 
 
+@respx.mock
+@mock_aws
+def test_execute_actions_for_airs_retstd_url():
+    """Test routing a url payload and executing actions: AIRS RetStd example"""
+
+    # mock mozart REST API
+    respx.post("https://example.com/api/v0.1/job/submit").mock(
+        return_value=Response(
+            200,
+            json={
+                "success": True,
+                "message": "",
+                "result": "fda11fad-35f0-466e-a785-4678a0e662de",
+                "tags": ["airs", "hysds"],
+            },
+        )
+    )
+
+    url = "s3://bucket/prefix/AIRS.2009.06.13.001.L2.RetStd.v6.0.7.0.G13077043030.hdf"
+    client = boto3.client("sns")
+    router_file = files("tests.resources").joinpath("test_router.yaml")
+    router = Router(router_file)
+    client.create_topic(
+        Name=list(router.get_evaluators_by_url(url))[0].name,
+        Attributes={"TracingConfig": "Active"},
+    )
+    results = router.execute_actions(url)
+    logger.info("results: %s", results)
+    for res in results:
+        assert res["success"]
+
+
 @mock_aws
 def test_unrecognized_url():
     """Test routing a url payload that is unrecognized: NISAR L0B example"""

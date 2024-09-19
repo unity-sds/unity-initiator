@@ -36,7 +36,7 @@ evaluator_config:
 # Currently only 2 types of actions are supported:
 # 1. submit payload to an SNS topic
 # 2. submit payload to an airflow DAG
-action_config: any(include("submit_dag_by_id_action"), include("submit_to_sns_topic_action"), include("submit_ogc_process_execution_action"))
+action_config: any(include("submit_dag_by_id_action"), include("submit_to_sns_topic_action"), include("submit_ogc_process_execution_action"), include("submit_hysds_job_action"))
 
 # Configuration for submitting a payload to an airflow DAG.
 submit_dag_by_id_action:
@@ -67,6 +67,17 @@ submit_ogc_process_execution_action:
     execution_inputs: map(required=False)
     execution_outputs: map(required=False)
     execution_subscriber: map(required=False)
+    on_success: include("on_success_actions", required=False)
+
+# Configuration for submitting a HySDS job
+submit_hysds_job_action:
+  name: str(equals="submit_hysds_job")
+  params:
+    mozart_base_api_endpoint: str(required=True)
+    job_spec: str(required=True)
+    queue: str(required=True)
+    priority: int(min=0, max=10, required=False)
+    tags: list(str(), required=False)
     on_success: include("on_success_actions", required=False)
 
 # Configuration to pass onto the evaluator to use when evaluation is a success.
