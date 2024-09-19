@@ -69,6 +69,17 @@ submit_ogc_process_execution_action:
     execution_subscriber: map(required=False)
     on_success: include("on_success_actions", required=False)
 
+# Configuration for submitting a HySDS job
+submit_hysds_job:
+  name: str(equals="submit_hysds_job")
+  params:
+    mozart_base_api_endpoint: str(required=True)
+    job_spec: str(required=True)
+    queue: str(required=True)
+    priority: int(min=0, max=10, required=False)
+    tags: list(str(), required=False)
+    on_success: include("on_success_actions", required=False)
+
 # Configuration to pass onto the evaluator to use when evaluation is a success.
 on_success_actions:
   actions: list(include("action_config"), required=True, min=1, max=1)
