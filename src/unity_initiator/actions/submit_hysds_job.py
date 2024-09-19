@@ -1,5 +1,5 @@
+import json
 import uuid
-from datetime import datetime
 
 import httpx
 
@@ -17,22 +17,22 @@ class SubmitHysdsJob(Action):
     def execute(self):
         """Submit job to mozart via REST API."""
 
+        # build job params
+        job_params = {
+            "payload": self._payload,
+            "payload_info": self._payload_info,
+            "on_success": self._params["on_success"],
+        }
+
         # setup url and request body
-        url = f"{self._params['mozart_base_api_endpoint']}/api/v0.1/job/submit"
+        url = self._params["mozart_base_api_endpoint"]
         body = {
             "queue": self._params["queue"],
             "priority": self._params.get("priority", 0),
             "tags": json.dumps(self._params.get("tags", [])),
             "type": self._params["job_spec"],
             "params": json.dumps(job_params),
-            "name": f"{self._params['job_spec'].split(':')[0]}-{str(uuid.uuid4())}"
-        }
-
-        # build job params
-        job_params = {
-            "payload": self._payload,
-            "payload_info": self._payload_info,
-            "on_success": self._params["on_success"],
+            "name": f"{self._params['job_spec'].split(':')[0]}-{str(uuid.uuid4())}",
         }
 
         # submit job

@@ -150,7 +150,7 @@ initiator_config:
                     actions:
                       - name: submit_hysds_job
                         params:
-                          mozart_base_api_endpoint: xxx
+                          mozart_base_api_endpoint: https://example.com/api/v0.1/job/submit
                           job_spec: submit_airs_ingest:v1
                           queue: ingest_queue
                           priority: 0
