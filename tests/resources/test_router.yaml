@@ -150,7 +150,7 @@ initiator_config:
                     actions:
                       - name: submit_hysds_job
                         params:
-                          mozart_base_api_endpoint: https://example.com/api/v0.1/job/submit
+                          mozart_base_api_endpoint: https://example.com/mozart/api/v0.1/job/submit
                           job_spec: submit_airs_ingest:v1
                           queue: ingest_queue
                           priority: 0
@@ -172,3 +172,44 @@ initiator_config:
                       - name: submit_ogc_process_execution
                         params:
                           process_id: hello_world
+
+      # ECMWF A2/A3
+      - regexes:
+          - '/(?P<id>(?P<model>ECMWF)_(?P<stream>A2A3)_(?P<init_year>\d{4})(?P<init_mon>\d{2})(?P<init_day>\d{2})(?P<init_hr>\d{2})(?P<init_min>\d{2})_(?P<forecast_year>\d{4})(?P<forecast_mon>\d{2})(?P<forecast_day>\d{2})(?P<forecast_hr>\d{2})(?P<forecast_min>\d{2})_(?P<exp_ver>\d+)\.json)$'
+        evaluators:
+
+          # If the regex matches, the router submits a convert_merge_a2_a3 HySDS job that contains
+          # the payload and the regex match groupdict() as JSON.
+          - name: convert_merge_a2_a3
+            actions:
+              - name: submit_hysds_job
+                params:
+                  mozart_base_api_endpoint: https://example.com/mozart/api/v0.1/job/submit
+                  job_spec: job-convert_merge_a2_a3:r4.0.4
+                  queue: factotum-ecmwf-licensed-worker-1
+                  priority: 0
+                  tags:
+                    - ecmwf
+                    - a2
+                    - a3
+                    - hysds
+
+      # ECMWF A4
+      - regexes:
+          - '/(?P<id>(?P<model>ECMWF)_(?P<stream>A4)_(?P<init_year>\d{4})(?P<init_mon>\d{2})(?P<init_day>\d{2})(?P<init_hr>\d{2})(?P<init_min>\d{2})_(?P<forecast_year>\d{4})(?P<forecast_mon>\d{2})(?P<forecast_day>\d{2})(?P<forecast_hr>\d{2})(?P<forecast_min>\d{2})_(?P<exp_ver>\d+)\.json)$'
+        evaluators:
+
+          # If the regex matches, the router submits a convert_a4 HySDS job that contains
+          # the payload and the regex match groupdict() as JSON.
+          - name: convert_a4
+            actions:
+              - name: submit_hysds_job
+                params:
+                  mozart_base_api_endpoint: https://example.com/mozart/api/v0.1/job/submit
+                  job_spec: job-convert_a4:r4.0.4
+                  queue: factotum-ecmwf-licensed-worker-2
+                  priority: 0
+                  tags:
+                    - ecmwf
+                    - a4
+                    - hysds
