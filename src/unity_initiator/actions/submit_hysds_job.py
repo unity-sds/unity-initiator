@@ -21,7 +21,7 @@ class SubmitHysdsJob(Action):
         job_params = {
             "payload": self._payload,
             "payload_info": self._payload_info,
-            "on_success": self._params["on_success"],
+            "on_success": self._params.get("on_success", None),
         }
 
         # setup url and request body
