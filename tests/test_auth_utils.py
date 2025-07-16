@@ -55,10 +55,10 @@ class TestAuthUtils:
 
         assert token == "test-access-token-123"
         mock_token_manager_class.assert_called_once_with(
-            username="testuser",
-            password="testpass",
-            client_id="test-client-id",
-            region="us-west-2",
+            "testuser",
+            "testpass",
+            "test-client-id",
+            "us-west-2",
         )
         mock_manager.get_valid_token.assert_called_once()
 
