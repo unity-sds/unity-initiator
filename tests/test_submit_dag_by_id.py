@@ -136,3 +136,94 @@ class TestSubmitDagByID:
 
         assert result["success"] is False
         assert result["response"] == "Bad Request"
+
+    @patch("unity_initiator.actions.submit_dag_by_id.OAuth2Manager")
+    def test_get_auth_token_with_oauth2_credentials(self, mock_oauth2_manager_class):
+        """Test token fetching with OAuth2 credentials."""
+        # Mock OAuth2Manager instance
+        mock_manager = Mock()
+        mock_manager.get_valid_token.return_value = "oauth2-token-123"
+        mock_oauth2_manager_class.return_value = mock_manager
+
+        params = {
+            "oauth2_cognito_domain": "test.auth.us-west-2.amazoncognito.com",
+            "oauth2_client_id": "test-oauth2-client-id",
+            "oauth2_redirect_uri": "https://example.com/callback",
+            "oauth2_scope": "openid email profile",
+            "oauth2_region": "us-west-2",
+        }
+
+        action = SubmitDagByID({}, {}, params)
+        token = action._get_auth_token()
+
+        assert token == "oauth2-token-123"
+        mock_oauth2_manager_class.assert_called_once_with(
+            cognito_domain="test.auth.us-west-2.amazoncognito.com",
+            client_id="test-oauth2-client-id",
+            redirect_uri="https://example.com/callback",
+            scope="openid email profile",
+            region="us-west-2",
+            verify_ssl=True,
+        )
+        mock_manager.get_valid_token.assert_called_once()
+
+    @patch("unity_initiator.actions.submit_dag_by_id.OAuth2Manager")
+    def test_get_auth_token_oauth2_priority_over_cognito(
+        self, mock_oauth2_manager_class
+    ):
+        """Test that OAuth2 credentials take priority over Cognito credentials."""
+        # Mock OAuth2Manager instance
+        mock_manager = Mock()
+        mock_manager.get_valid_token.return_value = "oauth2-token-123"
+        mock_oauth2_manager_class.return_value = mock_manager
+
+        params = {
+            # OAuth2 credentials
+            "oauth2_cognito_domain": "test.auth.us-west-2.amazoncognito.com",
+            "oauth2_client_id": "test-oauth2-client-id",
+            "oauth2_redirect_uri": "https://example.com/callback",
+            # Cognito credentials (should be ignored)
+            "unity_username": "testuser",
+            "unity_password": "testpass",
+            "unity_client_id": "test-client-id",
+        }
+
+        action = SubmitDagByID({}, {}, params)
+        token = action._get_auth_token()
+
+        assert token == "oauth2-token-123"
+        # OAuth2Manager should be called, not TokenManager
+        mock_oauth2_manager_class.assert_called_once()
+
+    @patch("unity_initiator.actions.submit_dag_by_id.OAuth2Manager")
+    def test_get_auth_token_with_oauth2_credentials_verify_ssl_false(
+        self, mock_oauth2_manager_class
+    ):
+        """Test token fetching with OAuth2 credentials and verify_ssl=False."""
+        # Mock OAuth2Manager instance
+        mock_manager = Mock()
+        mock_manager.get_valid_token.return_value = "oauth2-token-123"
+        mock_oauth2_manager_class.return_value = mock_manager
+
+        params = {
+            "oauth2_cognito_domain": "test.auth.us-west-2.amazoncognito.com",
+            "oauth2_client_id": "test-oauth2-client-id",
+            "oauth2_redirect_uri": "https://example.com/callback",
+            "oauth2_scope": "openid email profile",
+            "oauth2_region": "us-west-2",
+            "oauth2_verify_ssl": False,
+        }
+
+        action = SubmitDagByID({}, {}, params)
+        token = action._get_auth_token()
+
+        assert token == "oauth2-token-123"
+        mock_oauth2_manager_class.assert_called_once_with(
+            cognito_domain="test.auth.us-west-2.amazoncognito.com",
+            client_id="test-oauth2-client-id",
+            redirect_uri="https://example.com/callback",
+            scope="openid email profile",
+            region="us-west-2",
+            verify_ssl=False,
+        )
+        mock_manager.get_valid_token.assert_called_once()

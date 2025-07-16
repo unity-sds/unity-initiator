@@ -6,6 +6,7 @@ import httpx
 
 from ..utils.auth_utils import TokenManager, get_auth_headers
 from ..utils.logger import logger
+from ..utils.oauth2_utils import OAuth2Manager
 from .base import Action
 
 __all__ = ["SubmitDagByID"]
@@ -16,15 +17,37 @@ class SubmitDagByID(Action):
         super().__init__(payload, payload_info, params)
         logger.info("instantiated %s", __class__.__name__)
         self._token_manager: Optional[TokenManager] = None
+        self._oauth2_manager: Optional[OAuth2Manager] = None
 
     def _get_auth_token(self) -> Optional[str]:
         """
         Get authentication token based on available parameters.
-        Supports both direct token and Cognito token fetching with automatic refresh.
+        Supports direct token, Cognito token fetching, and OAuth2 authentication.
         """
         # Check if token is directly provided
         if "airflow_token" in self._params:
             return self._params["airflow_token"]
+
+        # Check if OAuth2 credentials are provided
+        oauth2_params = [
+            "oauth2_cognito_domain",
+            "oauth2_client_id",
+            "oauth2_redirect_uri",
+        ]
+        if all(param in self._params for param in oauth2_params):
+            # Initialize or use existing OAuth2 manager
+            if not self._oauth2_manager:
+                self._oauth2_manager = OAuth2Manager(
+                    cognito_domain=self._params["oauth2_cognito_domain"],
+                    client_id=self._params["oauth2_client_id"],
+                    redirect_uri=self._params["oauth2_redirect_uri"],
+                    scope=self._params.get("oauth2_scope", "openid email profile"),
+                    region=self._params.get("oauth2_region", "us-west-2"),
+                    verify_ssl=self._params.get("oauth2_verify_ssl", True),
+                )
+
+            # Get valid OAuth2 token (automatically refreshes if needed)
+            return self._oauth2_manager.get_valid_token()
 
         # Check if Cognito credentials are provided for token fetching
         cognito_params = ["unity_username", "unity_password", "unity_client_id"]

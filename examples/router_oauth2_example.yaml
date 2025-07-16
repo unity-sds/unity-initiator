@@ -1,0 +1,58 @@
+# Example router configuration with OAuth2 authentication for proxy servers
+# This example shows how to configure the Unity Initiator to work with
+# proxy servers that require OAuth2 authorization code flow
+
+initiator_config:
+  payload_type: url
+  evaluators:
+    - name: eval_oauth2_proxy_example
+      regex: "s3://.*\\.example\\.com/.*"
+      actions:
+        - name: submit_dag_by_id
+          params:
+            dag_id: oauth2_proxy_example_dag
+            airflow_base_api_endpoint: https://proxy.example.com/api/v1
+            # OAuth2 Authentication Configuration
+            oauth2_cognito_domain: your-domain.auth.us-west-2.amazoncognito.com
+            oauth2_client_id: your-oauth2-client-id
+            oauth2_redirect_uri: https://your-app.com/callback
+            oauth2_scope: openid email profile
+            oauth2_region: us-west-2
+            oauth2_verify_ssl: true  # Set to false only for development/testing
+            # Success actions (optional)
+            on_success:
+              - name: submit_to_sns_topic
+                params:
+                  topic_arn: arn:aws:sns:us-west-2:123456789012:oauth2-proxy-success-topic
+                  message: "OAuth2 proxy DAG submitted successfully for {payload}"
+
+# Alternative configuration with fallback authentication methods
+initiator_config_fallback:
+  payload_type: url
+  evaluators:
+    - name: eval_oauth2_with_fallback
+      regex: "s3://.*\\.example\\.com/.*"
+      actions:
+        - name: submit_dag_by_id
+          params:
+            dag_id: oauth2_fallback_example_dag
+            airflow_base_api_endpoint: https://proxy.example.com/api/v1
+            # OAuth2 Authentication (primary)
+            oauth2_cognito_domain: your-domain.auth.us-west-2.amazoncognito.com
+            oauth2_client_id: your-oauth2-client-id
+            oauth2_redirect_uri: https://your-app.com/callback
+            # Cognito Authentication (fallback)
+            unity_username: ${UNITY_USERNAME}
+            unity_password: ${UNITY_PASSWORD}
+            unity_client_id: ${UNITY_CLIENT_ID}
+            unity_region: us-west-2
+            # Basic Authentication (last resort)
+            airflow_username: ${AIRFLOW_USERNAME}
+            airflow_password: ${AIRFLOW_PASSWORD}
+
+# Environment variables to set:
+# UNITY_USERNAME=your-unity-username
+# UNITY_PASSWORD=your-unity-password
+# UNITY_CLIENT_ID=your-cognito-client-id
+# AIRFLOW_USERNAME=your-airflow-username
+# AIRFLOW_PASSWORD=your-airflow-password

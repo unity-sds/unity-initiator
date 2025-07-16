@@ -176,7 +176,29 @@ actions:
       airflow_token: ${AIRFLOW_BEARER_TOKEN}  # Bearer token
 ```
 
-#### 2. Cognito Token Authentication
+#### 2. OAuth2 Authentication (For Proxy Servers)
+Use OAuth2 authorization code flow for proxy authentication:
+
+```yaml
+actions:
+  - name: submit_dag_by_id
+    params:
+      dag_id: example_dag
+      airflow_base_api_endpoint: https://proxy.example.com/api/v1
+      oauth2_cognito_domain: your-domain.auth.us-west-2.amazoncognito.com
+      oauth2_client_id: your-oauth2-client-id
+      oauth2_redirect_uri: https://your-app.com/callback
+      oauth2_scope: openid email profile  # Optional, defaults to "openid email profile"
+      oauth2_region: us-west-2  # Optional, defaults to us-west-2
+      oauth2_verify_ssl: true  # Optional, defaults to true for security
+```
+
+**OAuth2 Flow Setup**:
+1. Use the provided `oauth2_token_init.py` script to initialize tokens
+2. The script will guide you through the authorization flow
+3. Tokens are automatically refreshed when needed
+
+#### 3. Cognito Token Authentication
 Use Unity Cognito credentials to automatically fetch and refresh tokens:
 
 ```yaml
@@ -191,7 +213,7 @@ actions:
       unity_region: us-west-2  # Optional, defaults to us-west-2
 ```
 
-#### 3. Basic Authentication (Legacy)
+#### 4. Basic Authentication (Legacy)
 Use username/password for basic authentication (less secure):
 
 ```yaml
@@ -207,9 +229,10 @@ actions:
 #### Authentication Priority
 The system will use authentication in this order:
 1. **Bearer token** (if `airflow_token` is provided)
-2. **Cognito token** (if Unity credentials are provided)
-3. **Basic auth** (if username/password are provided)
-4. **No authentication** (if no credentials are provided)
+2. **OAuth2 token** (if OAuth2 credentials are provided)
+3. **Cognito token** (if Unity credentials are provided)
+4. **Basic auth** (if username/password are provided)
+5. **No authentication** (if no credentials are provided)
 
 #### Token Management
 When using Cognito authentication:

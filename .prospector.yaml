@@ -13,6 +13,8 @@ pylint:
     - import-outside-toplevel
     - no-else-return
     - consider-using-sys-exit
+    - too-many-arguments
+    - too-many-positional-arguments
   options:
     max-line-length: 159
 
