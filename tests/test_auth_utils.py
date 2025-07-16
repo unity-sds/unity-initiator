@@ -41,45 +41,34 @@ class TestAuthUtils:
         assert headers["Content-Type"] == "application/json"
         assert headers["Accept"] == "application/json"
 
-    @patch("unity_initiator.utils.auth_utils.httpx.Client")
-    def test_fetch_cognito_token_success(self, mock_client_class):
+    @patch("unity_initiator.utils.auth_utils.TokenManager")
+    def test_fetch_cognito_token_success(self, mock_token_manager_class):
         """Test successful Cognito token fetching."""
-        # Mock successful response
-        mock_response = Mock()
-        mock_response.json.return_value = {
-            "AuthenticationResult": {
-                "AccessToken": "test-access-token-123",
-                "ExpiresIn": 3600,
-            }
-        }
-        mock_response.raise_for_status.return_value = None
-
-        # Mock client context manager
-        mock_client = Mock()
-        mock_client.post.return_value = mock_response
-        mock_client_class.return_value.__enter__.return_value = mock_client
-        mock_client_class.return_value.__exit__.return_value = None
+        # Mock TokenManager instance
+        mock_manager = Mock()
+        mock_manager.get_valid_token.return_value = "test-access-token-123"
+        mock_token_manager_class.return_value = mock_manager
 
         token = fetch_cognito_token(
             username="testuser", password="testpass", client_id="test-client-id"
         )
 
         assert token == "test-access-token-123"
-        mock_client.post.assert_called_once()
+        mock_token_manager_class.assert_called_once_with(
+            username="testuser",
+            password="testpass",
+            client_id="test-client-id",
+            region="us-west-2",
+        )
+        mock_manager.get_valid_token.assert_called_once()
 
-    @patch("unity_initiator.utils.auth_utils.httpx.Client")
-    def test_fetch_cognito_token_no_auth_result(self, mock_client_class):
+    @patch("unity_initiator.utils.auth_utils.TokenManager")
+    def test_fetch_cognito_token_no_auth_result(self, mock_token_manager_class):
         """Test Cognito token fetching with no authentication result."""
-        # Mock response without AuthenticationResult
-        mock_response = Mock()
-        mock_response.json.return_value = {"error": "Invalid credentials"}
-        mock_response.raise_for_status.return_value = None
-
-        # Mock client context manager
-        mock_client = Mock()
-        mock_client.post.return_value = mock_response
-        mock_client_class.return_value.__enter__.return_value = mock_client
-        mock_client_class.return_value.__exit__.return_value = None
+        # Mock TokenManager instance that returns None
+        mock_manager = Mock()
+        mock_manager.get_valid_token.return_value = None
+        mock_token_manager_class.return_value = mock_manager
 
         token = fetch_cognito_token(
             username="testuser", password="testpass", client_id="test-client-id"
@@ -87,14 +76,13 @@ class TestAuthUtils:
 
         assert token is None
 
-    @patch("unity_initiator.utils.auth_utils.httpx.Client")
-    def test_fetch_cognito_token_http_error(self, mock_client_class):
+    @patch("unity_initiator.utils.auth_utils.TokenManager")
+    def test_fetch_cognito_token_http_error(self, mock_token_manager_class):
         """Test Cognito token fetching with HTTP error."""
-        # Mock client that raises HTTPStatusError
-        mock_client = Mock()
-        mock_client.post.side_effect = Exception("HTTP error")
-        mock_client_class.return_value.__enter__.return_value = mock_client
-        mock_client_class.return_value.__exit__.return_value = None
+        # Mock TokenManager instance that returns None due to error
+        mock_manager = Mock()
+        mock_manager.get_valid_token.return_value = None
+        mock_token_manager_class.return_value = mock_manager
 
         token = fetch_cognito_token(
             username="testuser", password="testpass", client_id="test-client-id"
@@ -102,14 +90,13 @@ class TestAuthUtils:
 
         assert token is None
 
-    @patch("unity_initiator.utils.auth_utils.httpx.Client")
-    def test_fetch_cognito_token_request_error(self, mock_client_class):
+    @patch("unity_initiator.utils.auth_utils.TokenManager")
+    def test_fetch_cognito_token_request_error(self, mock_token_manager_class):
         """Test Cognito token fetching with request error."""
-        # Mock client that raises RequestError
-        mock_client = Mock()
-        mock_client.post.side_effect = Exception("Network error")
-        mock_client_class.return_value.__enter__.return_value = mock_client
-        mock_client_class.return_value.__exit__.return_value = None
+        # Mock TokenManager instance that returns None due to error
+        mock_manager = Mock()
+        mock_manager.get_valid_token.return_value = None
+        mock_token_manager_class.return_value = mock_manager
 
         token = fetch_cognito_token(
             username="testuser", password="testpass", client_id="test-client-id"

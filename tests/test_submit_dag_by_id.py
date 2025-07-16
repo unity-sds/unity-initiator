@@ -18,10 +18,13 @@ class TestSubmitDagByID:
         assert action._payload_info == payload_info
         assert action._params == params
 
-    @patch("unity_initiator.actions.submit_dag_by_id.fetch_cognito_token")
-    def test_get_auth_token_with_cognito_credentials(self, mock_fetch_token):
+    @patch("unity_initiator.actions.submit_dag_by_id.TokenManager")
+    def test_get_auth_token_with_cognito_credentials(self, mock_token_manager_class):
         """Test token fetching with Cognito credentials."""
-        mock_fetch_token.return_value = "test-token-123"
+        # Mock TokenManager instance
+        mock_manager = Mock()
+        mock_manager.get_valid_token.return_value = "test-token-123"
+        mock_token_manager_class.return_value = mock_manager
 
         params = {
             "unity_username": "testuser",
@@ -33,12 +36,13 @@ class TestSubmitDagByID:
         token = action._get_auth_token()
 
         assert token == "test-token-123"
-        mock_fetch_token.assert_called_once_with(
+        mock_token_manager_class.assert_called_once_with(
             username="testuser",
             password="testpass",
             client_id="test-client-id",
             region="us-west-2",
         )
+        mock_manager.get_valid_token.assert_called_once()
 
     def test_get_auth_token_with_direct_token(self):
         """Test token fetching with direct token."""
