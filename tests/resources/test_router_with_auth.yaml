@@ -1,0 +1,55 @@
+initiator_config:
+  name: test config with authentication examples
+
+  payload_type:
+    url:
+      # Test with Bearer token authentication
+      - regexes:
+          - '/(?P<id>bearer_test_(?P<timestamp>\d{10})\.json)$'
+        evaluators:
+          - name: eval_bearer_auth
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: test_bearer_auth_dag
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1
+                  airflow_token: test-bearer-token-123
+
+      # Test with Cognito authentication
+      - regexes:
+          - '/(?P<id>cognito_test_(?P<timestamp>\d{10})\.json)$'
+        evaluators:
+          - name: eval_cognito_auth
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: test_cognito_auth_dag
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1
+                  unity_username: testuser
+                  unity_password: testpass
+                  unity_client_id: test-client-id
+                  unity_region: us-west-2
+
+      # Test with Basic authentication
+      - regexes:
+          - '/(?P<id>basic_test_(?P<timestamp>\d{10})\.json)$'
+        evaluators:
+          - name: eval_basic_auth
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: test_basic_auth_dag
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1
+                  airflow_username: testuser
+                  airflow_password: testpass
+
+      # Test with no authentication
+      - regexes:
+          - '/(?P<id>no_auth_test_(?P<timestamp>\d{10})\.json)$'
+        evaluators:
+          - name: eval_no_auth
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: test_no_auth_dag
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1

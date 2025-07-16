@@ -1,0 +1,63 @@
+initiator_config:
+  name: example with cognito authentication
+
+  payload_type:
+    url:
+      # Example: Process data files with Cognito authentication
+      - regexes:
+          - '/(?P<id>example_data_(?P<date>\d{8})_(?P<version>\d{3})\.json)$'
+        evaluators:
+          - name: eval_example_data
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: process_example_data
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1
+                  # Method 1: Bearer token authentication (preferred)
+                  airflow_token: ${AIRFLOW_BEARER_TOKEN}
+
+                  # Method 2: Cognito authentication (alternative)
+                  # unity_username: ${UNITY_USERNAME}
+                  # unity_password: ${UNITY_PASSWORD}
+                  # unity_client_id: ${UNITY_CLIENT_ID}
+                  # unity_region: us-east-1
+
+                  # Method 3: Basic authentication (fallback)
+                  # airflow_username: ${AIRFLOW_USERNAME}
+                  # airflow_password: ${AIRFLOW_PASSWORD}
+
+                  on_success:
+                    actions:
+                      - name: submit_to_sns_topic
+                        params:
+                          topic_arn: arn:aws:sns:us-west-2:123456789012:example_processing_complete
+
+      # Example: Process with Cognito authentication
+      - regexes:
+          - '/(?P<id>cognito_data_(?P<timestamp>\d{10})\.csv)$'
+        evaluators:
+          - name: eval_cognito_data
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: process_cognito_data
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1
+                  # Cognito authentication
+                  unity_username: ${UNITY_USERNAME}
+                  unity_password: ${UNITY_PASSWORD}
+                  unity_client_id: ${UNITY_CLIENT_ID}
+                  unity_region: us-west-2
+
+      # Example: Process with basic authentication (legacy)
+      - regexes:
+          - '/(?P<id>legacy_data_(?P<id>\d{6})\.txt)$'
+        evaluators:
+          - name: eval_legacy_data
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: process_legacy_data
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1
+                  # Basic authentication
+                  airflow_username: ${AIRFLOW_USERNAME}
+                  airflow_password: ${AIRFLOW_PASSWORD}
