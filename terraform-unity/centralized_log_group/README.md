@@ -1,6 +1,6 @@
 # terraform-unity
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -37,4 +37,4 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_centralized_log_group_name"></a> [centralized\_log\_group\_name](#output\_centralized\_log\_group\_name) | The name of the centralized log group |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

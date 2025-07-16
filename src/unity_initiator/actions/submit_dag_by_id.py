@@ -4,8 +4,8 @@ from typing import Optional
 
 import httpx
 
+from ..utils.auth_utils import TokenManager, get_auth_headers
 from ..utils.logger import logger
-from ..utils.auth_utils import fetch_cognito_token, get_auth_headers, TokenManager
 from .base import Action
 
 __all__ = ["SubmitDagByID"]
@@ -25,28 +25,24 @@ class SubmitDagByID(Action):
         # Check if token is directly provided
         if "airflow_token" in self._params:
             return self._params["airflow_token"]
-        
+
         # Check if Cognito credentials are provided for token fetching
-        cognito_params = [
-            "unity_username", 
-            "unity_password", 
-            "unity_client_id"
-        ]
-        
+        cognito_params = ["unity_username", "unity_password", "unity_client_id"]
+
         if all(param in self._params for param in cognito_params):
             # Initialize or use existing token manager
             if not self._token_manager:
                 region = self._params.get("unity_region", "us-west-2")
                 self._token_manager = TokenManager(
                     username=self._params["unity_username"],
-                    password=self._params["unity_password"], 
+                    password=self._params["unity_password"],
                     client_id=self._params["unity_client_id"],
-                    region=region
+                    region=region,
                 )
-            
+
             # Get valid token (automatically refreshes if needed)
             return self._token_manager.get_valid_token()
-        
+
         return None
 
     def execute(self):
@@ -55,13 +51,13 @@ class SubmitDagByID(Action):
         logger.debug("executing execute in %s", __class__.__name__)
         url = f"{self._params['airflow_base_api_endpoint']}/dags/{self._params['dag_id']}/dagRuns"
         logger.info("url: %s", url)
-        
+
         dag_run_id = str(uuid.uuid4())
         logical_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        
+
         # Determine authentication method
         token = self._get_auth_token()
-        
+
         if token:
             # Use Bearer token authentication
             headers = get_auth_headers(auth_type="bearer", token=token)
@@ -71,7 +67,7 @@ class SubmitDagByID(Action):
             headers = get_auth_headers(
                 auth_type="basic",
                 username=self._params["airflow_username"],
-                password=self._params["airflow_password"]
+                password=self._params["airflow_password"],
             )
             auth = None
         else:
@@ -79,7 +75,7 @@ class SubmitDagByID(Action):
             headers = {"Content-Type": "application/json", "Accept": "application/json"}
             auth = None
             logger.warning("No authentication credentials provided")
-        
+
         body = {
             "dag_run_id": dag_run_id,
             "logical_date": logical_date,
@@ -90,11 +86,11 @@ class SubmitDagByID(Action):
             },
             "note": "",
         }
-        
+
         response = httpx.post(
             url, auth=auth, headers=headers, json=body, verify=False
         )  # nosec
-        
+
         if response.status_code in (200, 201):
             success = True
             resp = response.json()

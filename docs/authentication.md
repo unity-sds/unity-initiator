@@ -77,7 +77,7 @@ from unity_initiator.utils.auth_utils import TokenManager
 # Create a token manager
 manager = TokenManager(
     username="your-username",
-    password="your-password", 
+    password="your-password",
     client_id="your-client-id",
     region="us-west-2"
 )
@@ -206,10 +206,10 @@ manager = TokenManager(
 for i in range(100):
     # This will automatically refresh the token if it's expired or expiring soon
     token = manager.get_valid_token()
-    
+
     # Use the token for your API calls
     # ... your API calls here ...
-    
+
     time.sleep(60)  # Wait 1 minute between operations
 ```
 
@@ -278,7 +278,7 @@ If you're migrating from basic authentication to token-based authentication:
 - **Token Caching**: Valid tokens are cached in memory to avoid unnecessary API calls
 - **Refresh Buffer**: 5-minute buffer before expiration ensures tokens are refreshed proactively
 - **Efficient Refresh**: Only refreshes tokens when necessary, not on every request
-- **Memory Usage**: Token cache is minimal and automatically cleared when tokens expire 
+- **Memory Usage**: Token cache is minimal and automatically cleared when tokens expire
 
 ## ✅ **Automatic Token Refresh Implementation Complete!**
 
@@ -334,4 +334,4 @@ result3 = action.execute()  # May refresh token
 - **Refresh Calls**: ~200ms (token refresh)
 - **Memory Usage**: Minimal (just token strings and timestamps)
 
-The system is now **production-ready** for long-running applications and handles token expiration seamlessly! 🎉 
+The system is now **production-ready** for long-running applications and handles token expiration seamlessly! 🎉
