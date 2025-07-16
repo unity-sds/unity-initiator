@@ -160,6 +160,63 @@ and a trigger event payload for a new file that was triggered:
 
 In this case, the router sees that the action is `submit_dag_by_id` and thus makes a REST call to SPS to submit the URL payload, payload info, and `on_success` parameters as a DAG run. If the evaulator, running now as a DAG in SPS instead of an AWS Lambda function, successfully evaluates that everything is ready for this input file, it can proceed to submit a DAG run for the `submit_nisar_l0a_te_dag` DAG in the underlying SPS.
 
+### Authentication for Airflow DAG Submissions
+
+The `submit_dag_by_id` action supports multiple authentication methods for connecting to Airflow REST APIs. The authentication method is determined by the parameters provided in the router configuration:
+
+#### 1. Bearer Token Authentication (Recommended)
+Use a direct bearer token for authentication. This is the most secure method:
+
+```yaml
+actions:
+  - name: submit_dag_by_id
+    params:
+      dag_id: example_dag
+      airflow_base_api_endpoint: https://airflow.example.com/api/v1
+      airflow_token: ${AIRFLOW_BEARER_TOKEN}  # Bearer token
+```
+
+#### 2. Cognito Token Authentication
+Use Unity Cognito credentials to automatically fetch and refresh tokens:
+
+```yaml
+actions:
+  - name: submit_dag_by_id
+    params:
+      dag_id: example_dag
+      airflow_base_api_endpoint: https://airflow.example.com/api/v1
+      unity_username: ${UNITY_USERNAME}
+      unity_password: ${UNITY_PASSWORD}
+      unity_client_id: ${UNITY_CLIENT_ID}
+      unity_region: us-west-2  # Optional, defaults to us-west-2
+```
+
+#### 3. Basic Authentication (Legacy)
+Use username/password for basic authentication (less secure):
+
+```yaml
+actions:
+  - name: submit_dag_by_id
+    params:
+      dag_id: example_dag
+      airflow_base_api_endpoint: https://airflow.example.com/api/v1
+      airflow_username: ${AIRFLOW_USERNAME}
+      airflow_password: ${AIRFLOW_PASSWORD}
+```
+
+#### Authentication Priority
+The system will use authentication in this order:
+1. **Bearer token** (if `airflow_token` is provided)
+2. **Cognito token** (if Unity credentials are provided)
+3. **Basic auth** (if username/password are provided)
+4. **No authentication** (if no credentials are provided)
+
+#### Token Management
+When using Cognito authentication:
+- Tokens are automatically cached and refreshed 5 minutes before expiration
+- Failed token refresh attempts fall back to credential-based fetching
+- No manual token management required
+
 <!-- ☝️ Replace with a more detailed description of your repository, including why it was made and whom its intended for.  ☝️ -->
 
 <!-- example links>

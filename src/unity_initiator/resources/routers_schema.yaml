@@ -44,6 +44,15 @@ submit_dag_by_id_action:
   params:
     dag_id: str()
     airflow_base_api_endpoint: str(required=False)
+    # Authentication parameters - supports multiple methods:
+    # 1. Bearer token authentication (preferred)
+    airflow_token: str(required=False)
+    # 2. Cognito token authentication
+    unity_username: str(required=False)
+    unity_password: str(required=False)
+    unity_client_id: str(required=False)
+    unity_region: str(required=False)
+    # 3. Basic authentication (fallback)
     airflow_username: str(required=False)
     airflow_password: str(required=False)
     on_success: include("on_success_actions", required=False)
