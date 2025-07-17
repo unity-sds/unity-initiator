@@ -1,7 +1,7 @@
 fail_fast: true
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       # Git style
       - id: check-merge-conflict
@@ -9,14 +9,14 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+    rev: 6.0.1
     hooks:
       - id: isort
         args: ["--profile", "black", "--filter-files"]
 
   # Using this mirror lets us use mypyc-compiled black, which is about 2x faster
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 24.4.2
+    rev: 25.1.0
     hooks:
       - id: black
         # It is recommended to specify the latest version of Python
@@ -27,24 +27,24 @@ repos:
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.4.5
+    rev: v0.12.3
     hooks:
       - id: ruff
         args: ["--ignore", "E501,E402"]
 
   - repo: https://github.com/PyCQA/bandit
-    rev: "1.7.8" # you must change this to newest version
+    rev: "1.8.6" # you must change this to newest version
     hooks:
       - id: bandit
         args: ["--severity-level=high", "--confidence-level=high"]
 
   - repo: https://github.com/PyCQA/prospector
-    rev: v1.10.3
+    rev: v1.17.2
     hooks:
       - id: prospector
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.90.0 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
+    rev: v1.99.5 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
     hooks:
       # Terraform Tests
       - id: terraform_fmt

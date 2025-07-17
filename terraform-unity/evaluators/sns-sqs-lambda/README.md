@@ -1,6 +1,6 @@
 # sns_sqs_lambda
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -62,4 +62,4 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_evaluator_topic_arn"></a> [evaluator\_topic\_arn](#output\_evaluator\_topic\_arn) | The ARN of the evaluator SNS topic |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
