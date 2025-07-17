@@ -83,6 +83,86 @@ The Unity initiator is the set of compute resources that enable the routing of t
 
 The initiator topic, an SNS topic, is the common interface that all triggers will submit events to. The initiator topic is subscribed to by the initiator SQS queue (complete with dead-letter queue for resiliency) which in turn is subscribed to by the router Lambda function. How the router Lambda routes payloads of the trigger events is defined by the router configuration YAML. The full YAML schema for the router configuration is located [here](src/unity_initiator/resources/routers_schema.yaml).
 
+## Authentication in Router Configs
+
+The Unity Initiator supports multiple authentication methods for submitting DAG runs to Airflow. You can use legacy Basic Auth, or Bearer token authentication using AWS Cognito (either OAuth2 or InitiateAuth flows). Choose the method that matches your Airflow API deployment and security requirements.
+
+Below are full example router configs for each authentication method. See the [router schema](src/unity_initiator/resources/routers_schema.yaml) for all available fields.
+
+### 1. Basic Auth (Legacy)
+```yaml
+initiator_config:
+  name: basic-auth example
+  payload_type:
+    url:
+      - regexes:
+          - '.*\\.dat$'
+        evaluators:
+          - name: eval_basic
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: my_airflow_dag
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1
+                  auth_method: basic
+                  airflow_username: my-airflow-username
+                  airflow_password: my-airflow-password
+```
+
+### 2. Bearer Token (Cognito OAuth2)
+```yaml
+initiator_config:
+  name: bearer-oauth2 example
+  payload_type:
+    url:
+      - regexes:
+          - '.*\\.dat$'
+        evaluators:
+          - name: eval_oauth2
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: my_airflow_dag
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1
+                  auth_method: bearer
+                  cognito_token_method: oauth2
+                  cognito_token_url: https://your-cognito-domain.auth.us-west-2.amazoncognito.com/oauth2/token
+                  cognito_client_id: your-client-id
+                  cognito_client_secret: your-client-secret
+                  cognito_username: your-username
+                  cognito_password: your-password
+```
+
+### 3. Bearer Token (Cognito InitiateAuth)
+```yaml
+initiator_config:
+  name: bearer-initiate-auth example
+  payload_type:
+    url:
+      - regexes:
+          - '.*\\.dat$'
+        evaluators:
+          - name: eval_initauth
+            actions:
+              - name: submit_dag_by_id
+                params:
+                  dag_id: my_airflow_dag
+                  airflow_base_api_endpoint: https://airflow.example.com/api/v1
+                  auth_method: bearer
+                  cognito_token_method: initiate_auth
+                  cognito_region: us-west-2
+                  cognito_client_id: your-client-id
+                  cognito_username: your-username
+                  cognito_password: your-password
+```
+
+**When to use each method:**
+- Use `basic` for legacy Airflow deployments with HTTP Basic Auth.
+- Use `bearer` with `oauth2` for OIDC/JWT-based Airflow APIs (API Gateway/ALB with Cognito OIDC).
+- Use `bearer` with `initiate_auth` for AWS-native Cognito integrations (if your API expects tokens from the InitiateAuth flow).
+
+For more advanced usage (e.g., on_success actions, multiple evaluators, or other action types), see the schema and additional documentation below.
+
 #### How the router works
 
 In the context of trigger events where a new file is detected (payload_type=`url`), the router Lambda extracts the URL of the new file, instantiates a router object and attempts to match it up against of set of regular expressions defined in the router configuration file. Let's consider this minimal router configuration YAML file example:

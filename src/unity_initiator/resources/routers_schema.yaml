@@ -44,8 +44,24 @@ submit_dag_by_id_action:
   params:
     dag_id: str()
     airflow_base_api_endpoint: str(required=False)
+    # Auth method: 'basic' (default) or 'bearer'
+    auth_method: str(required=False, enum=["basic", "bearer"])
+    # For basic auth (legacy)
     airflow_username: str(required=False)
     airflow_password: str(required=False)
+    # For bearer token auth (Cognito)
+    cognito_client_id: str(required=False)
+    cognito_client_secret: str(required=False)
+    cognito_token_url: str(required=False)
+    cognito_username: str(required=False)
+    cognito_password: str(required=False)
+    # Optionally, allow passing a pre-fetched bearer token and its expiry
+    bearer_token: str(required=False)
+    bearer_token_expiry: int(required=False)
+    # Cognito token method: 'oauth2' (default) or 'initiate_auth'
+    cognito_token_method: str(required=False, enum=["oauth2", "initiate_auth"])
+    # Cognito region (required for initiate_auth)
+    cognito_region: str(required=False)
     on_success: include("on_success_actions", required=False)
 
 # Configuration for submitting a payload to an SNS topic.
