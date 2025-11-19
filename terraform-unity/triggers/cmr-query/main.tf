@@ -88,7 +88,7 @@ resource "aws_iam_role" "cmr_query_lambda_iam_role" {
       },
     ],
   })
-  permissions_boundary = data.aws_iam_policy.mcp_operator_policy.arn
+  permissions_boundary = data.aws_iam_policy.smce_operator_policy.arn
   tags                 = local.tags
 }
 
@@ -161,7 +161,7 @@ resource "aws_iam_role" "scheduler" {
       }
     ]
   })
-  permissions_boundary = data.aws_iam_policy.mcp_operator_policy.arn
+  permissions_boundary = data.aws_iam_policy.smce_operator_policy.arn
   tags                 = local.tags
 }
 
