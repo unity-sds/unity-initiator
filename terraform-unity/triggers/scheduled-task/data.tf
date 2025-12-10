@@ -1,5 +1,5 @@
-data "aws_iam_policy" "mcp_operator_policy" {
-  name = "mcp-tenantOperator-AMI-APIG"
+data "aws_iam_policy" "smce_operator_policy" {
+  name = "zsmce-tenantOperator-AMI-APIG"
 }
 
 data "archive_file" "lambda_zip_inline" {
