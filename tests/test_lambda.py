@@ -59,6 +59,9 @@ def setup_mock_resources():
     sns_client.create_topic(
         Name="eval_nisar_ingest", Attributes={"TracingConfig": "Active"}
     )
+    sns_client.create_topic(
+        Name="eval_airs_ingest", Attributes={"TracingConfig": "Active"}
+    )
 
     # mock airflow REST API
     respx.post("https://example.com/api/v1/dags/eval_nisar_l0a_readiness/dagRuns").mock(
@@ -79,6 +82,19 @@ def setup_mock_resources():
                 "external_trigger": True,
                 "conf": {},
                 "note": "",
+            },
+        )
+    )
+
+    # mock mozart REST API
+    respx.post("https://example.com/api/v0.1/job/submit").mock(
+        return_value=Response(
+            200,
+            json={
+                "success": True,
+                "message": "",
+                "result": "fda11fad-35f0-466e-a785-4678a0e662de",
+                "tags": ["airs", "hysds"],
             },
         )
     )
@@ -245,6 +261,21 @@ class TestLambdaInvocations:
         # NISAR LDF use case
         in_data = {
             "payload": "s3://bucket/prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_18_03_05_087077000.ldf"
+        }
+        invoke_res = self.client.invoke(
+            FunctionName=self.function_name,
+            InvocationType="Event",
+            Payload=json.dumps(in_data),
+        )
+        logger.info("invoke_res: %s", invoke_res)
+        results = json.loads(invoke_res["Payload"].read().decode("utf-8"))
+        logger.info("results: %s", results)
+        for res in results:
+            assert res["success"]
+
+        # AIRS RetStd use case
+        in_data = {
+            "payload": "s3://bucket/prefix/AIRS.2009.06.13.001.L2.RetStd.v6.0.7.0.G13077043030.hdf"
         }
         invoke_res = self.client.invoke(
             FunctionName=self.function_name,
@@ -449,4 +480,13 @@ class TestInitiatorLambda:
         assert self.invoke_initiator_via_s3_event(
             self.bucket_name,
             "prefix/NISAR_S198_PA_PA11_M00_P00922_R00_C01_G00_2024_010_18_03_05_087077000.ldf",
+        )
+
+    def test_initiator_airs_retstd(self):
+        """Test invocations of the initiator lambda via S3 event using AIRS RetStd test case: submit_hysds_job"""
+
+        # Upload file to trigger notification
+        assert self.invoke_initiator_via_s3_event(
+            self.bucket_name,
+            "prefix/AIRS.2009.06.13.001.L2.RetStd.v6.0.7.0.G13077043030.hdf",
         )
