@@ -7,7 +7,7 @@ PKG_DIR=${DIST_DIR}/lambda_packages
 set -ex
 
 rm -rf $DIST_DIR
-pip install hatch
+pip install "hatch<1.10"  # Use older hatch version compatible with virtualenv 21.1.0
 hatch clean
 hatch build
 VERSION=$(hatch run python -c 'from importlib.metadata import version; print(version("unity_initiator"))')
